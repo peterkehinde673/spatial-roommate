@@ -22,7 +22,49 @@ if (!container) {
   throw new Error('Missing #scene-container');
 }
 
-const world = await World.create(container, projectOptions);
+const supportsWebXR = 'xr' in navigator;
+const runtimeOptions = supportsWebXR
+  ? projectOptions
+  : {
+      ...projectOptions,
+      xr: false,
+      input: {
+        canvasPointerEvents: true,
+      },
+      features: {
+        grabbing: true,
+        locomotion: {
+          browserControls: true,
+        },
+      },
+      render: {
+        camera: {
+          position: [0, 1.55, 0],
+          lookAt: [0, 1.35, -1],
+        },
+      },
+    };
+
+const runtimeStatus = document.querySelector<HTMLDivElement>('#runtime-status');
+if (runtimeStatus) {
+  runtimeStatus.textContent = supportsWebXR
+    ? 'Loading Spatial Roommate…'
+    : 'Loading browser workspace…';
+}
+
+let world;
+try {
+  world = await World.create(container, runtimeOptions);
+  runtimeStatus?.remove();
+} catch (error) {
+  console.error('Spatial Roommate failed to initialize', error);
+  if (runtimeStatus) {
+    runtimeStatus.textContent =
+      'Spatial Roommate could not start on this browser. Try Chrome or Meta Quest Browser.';
+    runtimeStatus.classList.add('error');
+  }
+  throw error;
+}
 const root = world.getPersistentRoot();
 
 const deskMaterial = new MeshStandardMaterial({ color: 0x243047 });
