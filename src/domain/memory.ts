@@ -16,7 +16,7 @@ export function saveSession(goal: string, tasks: SpatialTask[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
 }
 
-export function loadSession(tasks: SpatialTask[]): { goal: string; resumed: boolean } {
+export function loadSession(tasks: SpatialTask[], currentGoal?: string): { goal: string; resumed: boolean } {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) {
     return { goal: '', resumed: false };
@@ -24,6 +24,10 @@ export function loadSession(tasks: SpatialTask[]): { goal: string; resumed: bool
 
   try {
     const stored = JSON.parse(raw) as StoredSession;
+    if (currentGoal && stored.goal !== currentGoal) {
+      return { goal: '', resumed: false };
+    }
+
     for (const task of tasks) {
       const saved = stored.tasks.find((item) => item.id === task.id);
       if (saved) {
