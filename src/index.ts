@@ -3,16 +3,17 @@ import {
   BoxGeometry,
   Mesh,
   MeshStandardMaterial,
-  RayInteractable,
   PokeInteractable,
+  RayInteractable,
   SphereGeometry,
+  UIKitMLAsset,
   OneHandGrabbable,
   World,
 } from '@iwsdk/core';
 import projectOptions from 'virtual:iwsdk-project';
 import { getCompanionState } from './domain/companion';
 import { planGoal } from './domain/planner';
-import { loadSession, saveSession } from './domain/memory';
+import { getStoredGoal, loadSession, saveSession } from './domain/memory';
 import { summarizeSession } from './domain/session';
 
 const container = document.querySelector<HTMLDivElement>('#scene-container');
@@ -25,10 +26,7 @@ const world = await World.create(container, projectOptions);
 const root = world.getPersistentRoot();
 
 const deskMaterial = new MeshStandardMaterial({ color: 0x243047 });
-const desk = new Mesh(
-  new BoxGeometry(3.2, 0.12, 2.0),
-  deskMaterial,
-);
+const desk = new Mesh(new BoxGeometry(3.2, 0.12, 2.0), deskMaterial);
 desk.position.set(0, 1.0, -1.0);
 root.add(desk);
 
@@ -36,7 +34,6 @@ const companionMaterial = new MeshStandardMaterial({
   color: 0x7dd3fc,
   emissive: 0x164e63,
 });
-
 const companion = new Mesh(
   new SphereGeometry(0.22, 24, 16),
   companionMaterial,
@@ -83,16 +80,6 @@ const companionEntity = world.createTransformEntity(companion);
 companionEntity.addComponent(RayInteractable);
 companionEntity.addComponent(PokeInteractable);
 
-companion.addEventListener('pointerover', () => {
-  if (!sessionStarted) {
-    wakeRing.scale.setScalar(1.15);
-  }
-});
-
-companion.addEventListener('pointerout', () => {
-  wakeRing.scale.setScalar(1);
-});
-
 const light = new AmbientLight(0xffffff, 2);
 root.add(light);
 
@@ -102,15 +89,11 @@ const completeMaterial = new MeshStandardMaterial({
   emissive: 0x14532d,
 });
 
-const taskCards: Mesh[] = [];
-const goal =
-  new URLSearchParams(window.location.search).get('goal')?.trim() ||
-  'Build something worth returning to';
-const plannedTasks = planGoal(goal);
-const memory = loadSession(plannedTasks, goal);
-const initialSummary = summarizeSession(plannedTasks);
+let goal = new URLSearchParams(window.location.search).get('goal')?.trim() || getStoredGoal();
+let plannedTasks = planGoal(goal || 'Choose a goal');
+let memory = goal ? loadSession(plannedTasks, goal) : { goal: '', resumed: false };
 let sessionStarted = memory.resumed;
-let completedTasks = plannedTasks.filter((task) => task.status === 'complete').length;
+const taskCards: Mesh[] = [];
 
 function updateTaskFocus(): void {
   const nextOpenId = plannedTasks.find((task) => task.status === 'open')?.id;
@@ -154,6 +137,7 @@ function updateCompanion(): void {
     companionMaterial.emissive.setHex(0x164e63);
     deskMaterial.color.setHex(0x243047);
     completionRing.visible = false;
+    completionPulse.visible = false;
   }
 
   console.log(
@@ -161,46 +145,126 @@ function updateCompanion(): void {
   );
 }
 
-for (const task of plannedTasks) {
-  const card = new Mesh(
-    new BoxGeometry(0.72, 0.42, 0.12),
-    taskMaterial.clone(),
-  );
-  card.position.set(...task.position);
-  card.visible = memory.resumed;
-  if (task.status === 'complete') {
-    card.material = completeMaterial.clone();
+function clearTaskCards(): void {
+  for (const card of taskCards) {
+    card.removeFromParent();
   }
-  taskCards.push(card);
-
-  const entity = world.createTransformEntity(card);
-  entity.addComponent(RayInteractable);
-  entity.addComponent(OneHandGrabbable, {
-    translate: true,
-    rotate: false,
-  });
-
-  card.addEventListener('pointerdown', () => {
-    const wasOpen = task.status === 'open';
-    task.status = wasOpen ? 'complete' : 'open';
-    completedTasks += wasOpen ? 1 : -1;
-    card.material = task.status === 'complete'
-      ? completeMaterial.clone()
-      : taskMaterial.clone();
-
-    saveSession(goal, plannedTasks);
-    const summary = summarizeSession(plannedTasks);
-    console.log(
-      summary.finished
-        ? 'Roommate: session complete. Come back when you are ready for the next goal.'
-        : `Roommate: ${summary.remaining} step${summary.remaining === 1 ? '' : 's'} left${summary.nextTask ? ` — next: ${summary.nextTask}` : ''}.`,
-    );
-    updateTaskFocus();
-    updateCompanion();
-  });
+  taskCards.length = 0;
 }
 
+function createTaskCards(): void {
+  clearTaskCards();
+
+  for (const task of plannedTasks) {
+    const card = new Mesh(
+      new BoxGeometry(0.72, 0.42, 0.12),
+      taskMaterial.clone(),
+    );
+    card.position.set(...task.position);
+    card.visible = memory.resumed;
+
+    if (task.status === 'complete') {
+      card.material = completeMaterial.clone();
+    }
+
+    taskCards.push(card);
+
+    const entity = world.createTransformEntity(card);
+    entity.addComponent(RayInteractable);
+    entity.addComponent(OneHandGrabbable, {
+      translate: true,
+      rotate: false,
+    });
+
+    card.addEventListener('pointerdown', () => {
+      const wasOpen = task.status === 'open';
+      task.status = wasOpen ? 'complete' : 'open';
+      card.material = task.status === 'complete'
+        ? completeMaterial.clone()
+        : taskMaterial.clone();
+
+      saveSession(goal, plannedTasks);
+      const summary = summarizeSession(plannedTasks);
+      console.log(
+        summary.finished
+          ? 'Roommate: session complete. Come back when you are ready for the next goal.'
+          : `Roommate: ${summary.remaining} step${summary.remaining === 1 ? '' : 's'} left${summary.nextTask ? ` — next: ${summary.nextTask}` : ''}.`,
+      );
+      updateTaskFocus();
+      updateCompanion();
+    });
+  }
+}
+
+async function startWorkspace(selectedGoal: string): Promise<void> {
+  goal = selectedGoal.trim();
+  if (!goal) return;
+
+  plannedTasks = planGoal(goal);
+  memory = loadSession(plannedTasks, goal);
+  sessionStarted = memory.resumed;
+  createTaskCards();
+
+  wakeRing.visible = !sessionStarted;
+  if (sessionStarted) {
+    updateTaskFocus();
+    updateCompanion();
+    console.log(
+      `Roommate: welcome back. Resuming your ${memory.goal || goal} workspace. ${summarizeSession(plannedTasks).completed}/${plannedTasks.length} steps complete.`,
+    );
+  } else {
+    console.log(`Roommate: goal accepted — ${goal}`);
+    console.log('Roommate: touch the companion to begin your spatial workspace.');
+  }
+}
+
+const goalPanel = !goal
+  ? await world.assets.instantiate<UIKitMLAsset>('goal-panel')
+  : null;
+
+if (goalPanel) {
+  const goalPanelEntity = world.createTransformEntity(goalPanel);
+  goalPanelEntity.object3D!.position.set(0, 1.55, -1.65);
+  goalPanelEntity.object3D!.scale.setScalar(0.25);
+  goalPanelEntity.addComponent(RayInteractable);
+  goalPanelEntity.addComponent(PokeInteractable);
+
+  const selectGoal = (selectedGoal: string) => {
+    goalPanel.visible = false;
+    void startWorkspace(selectedGoal);
+  };
+
+  goalPanel.requireElementById('build-goal').addEventListener('click', () => {
+    selectGoal('Build a portfolio project');
+  });
+  goalPanel.requireElementById('learn-goal').addEventListener('click', () => {
+    selectGoal('Learn a new skill');
+  });
+  goalPanel.requireElementById('plan-goal').addEventListener('click', () => {
+    selectGoal('Plan a productive week');
+  });
+
+  console.log('Roommate: choose a goal from the spatial panel.');
+} else {
+  await startWorkspace(goal);
+}
+
+companion.addEventListener('pointerover', () => {
+  if (!sessionStarted) {
+    wakeRing.scale.setScalar(1.15);
+  }
+});
+
+companion.addEventListener('pointerout', () => {
+  wakeRing.scale.setScalar(1);
+});
+
 companion.addEventListener('pointerdown', () => {
+  if (!goal) {
+    console.log('Roommate: choose a goal before starting.');
+    return;
+  }
+
   if (sessionStarted) {
     console.log('Roommate: tasks are already in the room.');
     return;
@@ -214,14 +278,9 @@ companion.addEventListener('pointerdown', () => {
     card.visible = true;
   }
 
-  console.log('Roommate: welcome back. Your workspace is ready.');
+  console.log('Roommate: welcome. Your workspace is ready.');
   updateTaskFocus();
   updateCompanion();
 });
 
-console.log(
-  memory.resumed
-    ? `Roommate: welcome back. Resuming your ${memory.goal || goal} workspace. ${initialSummary.completed}/${initialSummary.total} steps complete.`
-    : 'Roommate: touch the companion to begin your spatial workspace.',
-);
 console.log('Spatial Roommate companion reasoning ready', world);
