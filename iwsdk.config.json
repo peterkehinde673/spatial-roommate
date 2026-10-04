@@ -8,13 +8,16 @@
   "world": {
     "xr": {
       "mode": "vr",
-      "offer": "always",
+      "offer": "once",
       "features": {
         "handTracking": true
       }
     },
+    "input": {
+      "canvasPointerEvents": true
+    },
     "features": {
-      "locomotion": false,
+      "locomotion": { "browserControls": true },
       "grabbing": true,
       "spatialUI": true
     }
