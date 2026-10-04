@@ -136,6 +136,7 @@ function updateTaskFocus(): void {
 }
 
 function updateProgressMarkers(): void {
+  const summary = summarizeSession(plannedTasks);
   for (let index = 0; index < progressMarkers.length; index += 1) {
     const marker = progressMarkers[index];
     const task = plannedTasks[index];
@@ -146,6 +147,15 @@ function updateProgressMarkers(): void {
     material.emissive.setHex(complete ? 0x166534 : 0x0f172a);
     marker.scale.setScalar(complete ? 1.35 : 1);
   }
+
+  const completedMarkers = Math.round(summary.progress * progressMarkers.length);
+  progressMarkers.forEach((marker, index) => {
+    if (index < completedMarkers) {
+      marker.position.y = 1.68 + summary.progress * 0.08;
+    } else {
+      marker.position.y = 1.68;
+    }
+  });
 }
 
 function updateCompanion(): void {
