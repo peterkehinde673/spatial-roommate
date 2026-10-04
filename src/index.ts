@@ -53,6 +53,20 @@ completionRing.position.copy(companion.position);
 completionRing.visible = false;
 root.add(completionRing);
 
+const wakeRing = new Mesh(
+  new SphereGeometry(0.34, 24, 16),
+  new MeshStandardMaterial({
+    color: 0x38bdf8,
+    emissive: 0x0c4a6e,
+    wireframe: true,
+  }),
+);
+wakeRing.position.copy(companion.position);
+root.add(wakeRing);
+
+const companionEntity = world.createTransformEntity(companion);
+companionEntity.addComponent(RayInteractable);
+
 const light = new AmbientLight(0xffffff, 2);
 root.add(light);
 
@@ -61,6 +75,9 @@ const completeMaterial = new MeshStandardMaterial({
   color: 0x22c55e,
   emissive: 0x14532d,
 });
+
+let sessionStarted = false;
+const taskCards: Mesh[] = [];
 
 function updateCompanion(): void {
   const state = getCompanionState(initialTasks);
@@ -101,6 +118,8 @@ for (const task of initialTasks) {
     taskMaterial.clone(),
   );
   card.position.set(...task.position);
+  card.visible = false;
+  taskCards.push(card);
 
   const entity = world.createTransformEntity(card);
   entity.addComponent(RayInteractable);
@@ -119,5 +138,22 @@ for (const task of initialTasks) {
   });
 }
 
-updateCompanion();
+companion.addEventListener('pointerdown', () => {
+  if (sessionStarted) {
+    console.log('Roommate: tasks are already in the room.');
+    return;
+  }
+
+  sessionStarted = true;
+  wakeRing.visible = false;
+
+  for (const card of taskCards) {
+    card.visible = true;
+  }
+
+  console.log('Roommate: welcome back. Your workspace is ready.');
+  updateCompanion();
+});
+
+console.log('Roommate: touch the companion to begin your spatial workspace.');
 console.log('Spatial Roommate companion reasoning ready', world);
