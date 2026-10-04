@@ -107,6 +107,7 @@ let plannedTasks = planGoal(goal || 'Choose a goal');
 let memory = goal ? loadSession(plannedTasks, goal) : { goal: '', resumed: false };
 let sessionStarted = memory.resumed;
 const taskCards: Mesh[] = [];
+let goalPanel: UIKitMLAsset | null = null;
 
 function updateTaskFocus(): void {
   const nextOpenId = plannedTasks.find((task) => task.status === 'open')?.id;
@@ -231,6 +232,12 @@ function createTaskCards(): void {
         }, 280);
       }
       const summary = summarizeSession(plannedTasks);
+      if (summary.finished && goalPanel) {
+        goalPanel.visible = true;
+        sessionStarted = false;
+        wakeRing.visible = false;
+        console.log('Roommate: you finished this goal. Choose another goal when you are ready to return.');
+      }
       console.log(
         summary.finished
           ? 'Roommate: session complete. Come back when you are ready for the next goal.'
@@ -264,7 +271,7 @@ async function startWorkspace(selectedGoal: string): Promise<void> {
   }
 }
 
-const goalPanel = !goal
+goalPanel = !goal
   ? await world.assets.instantiate<UIKitMLAsset>('goal-panel')
   : null;
 
