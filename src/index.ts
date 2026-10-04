@@ -114,6 +114,13 @@ const completeMaterial = new MeshStandardMaterial({
   emissive: 0x14532d,
 });
 
+const categoryMaterial = {
+  build: new MeshStandardMaterial({ color: 0x60a5fa, emissive: 0x1e3a8a }),
+  learn: new MeshStandardMaterial({ color: 0xc084fc, emissive: 0x581c87 }),
+  plan: new MeshStandardMaterial({ color: 0xfbbf24, emissive: 0x78350f }),
+  general: new MeshStandardMaterial({ color: 0x94a3b8, emissive: 0x334155 }),
+};
+
 let goal = new URLSearchParams(window.location.search).get('goal')?.trim() || getStoredGoal();
 let plannedTasks = planGoal(goal || 'Choose a goal');
 let memory = goal ? loadSession(plannedTasks, goal) : { goal: '', resumed: false };
@@ -206,7 +213,15 @@ function createTaskCards(): void {
   clearTaskCards();
 
   const normalizedGoal = goal.toLowerCase();
-  const taskGeometry = normalizedGoal.includes('learn') || normalizedGoal.includes('skill')
+  const taskCategory = normalizedGoal.includes('learn') || normalizedGoal.includes('skill')
+    ? 'learn'
+    : normalizedGoal.includes('plan') || normalizedGoal.includes('week')
+      ? 'plan'
+      : normalizedGoal.includes('build') || normalizedGoal.includes('project')
+        ? 'build'
+        : 'general';
+  const activeTaskMaterial = categoryMaterial[taskCategory];
+  const taskGeometry = taskCategory === 'learn'
     ? new SphereGeometry(0.28, 20, 14)
     : normalizedGoal.includes('plan') || normalizedGoal.includes('week')
       ? new BoxGeometry(0.62, 0.62, 0.16)
@@ -215,7 +230,7 @@ function createTaskCards(): void {
   for (const [index, task] of plannedTasks.entries()) {
     const card = new Mesh(
       taskGeometry.clone(),
-      taskMaterial.clone(),
+      activeTaskMaterial.clone(),
     );
     card.rotation.y = index * 0.18;
     card.position.set(...task.position);
@@ -239,7 +254,7 @@ function createTaskCards(): void {
       task.status = wasOpen ? 'complete' : 'open';
       card.material = task.status === 'complete'
         ? completeMaterial.clone()
-        : taskMaterial.clone();
+        : activeTaskMaterial.clone();
 
       saveSession(goal, plannedTasks);
       if (wasOpen) {
