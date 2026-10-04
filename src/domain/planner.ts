@@ -18,13 +18,19 @@ export function planGoal(goal: string): SpatialTask[] {
   const intent = parseGoal(goal);
   const normalizedGoal = intent.focus;
   const prefixes = prefixByCategory[intent.category];
+  const categoryHint = {
+    build: 'Create something concrete you can ship.',
+    learn: 'Turn curiosity into a repeatable practice.',
+    plan: 'Turn the goal into a clear sequence of actions.',
+    general: 'Make steady progress toward the goal.',
+  }[intent.category];
 
   return taskTemplates.map((task, index) => ({
     ...task,
     title:
       normalizedGoal
         ? `${prefixes[index]}: ${normalizedGoal}`
-        : prefixes[index],
+        : `${prefixes[index]}: ${categoryHint}`,
     position: [-0.95 + index * 0.95, 1.38, -1.05],
     status: 'open',
   }));
