@@ -11,6 +11,7 @@ import {
 import projectOptions from 'virtual:iwsdk-project';
 import { getCompanionState } from './domain/companion';
 import { planGoal } from './domain/planner';
+import { loadSession, saveSession } from './domain/memory';
 
 const container = document.querySelector<HTMLDivElement>('#scene-container');
 
@@ -79,7 +80,9 @@ const completeMaterial = new MeshStandardMaterial({
 let sessionStarted = false;
 let completedTasks = 0;
 const taskCards: Mesh[] = [];
-const plannedTasks = planGoal('Build something worth returning to');
+const goal = 'Build something worth returning to';
+const plannedTasks = planGoal(goal);
+const memory = loadSession(plannedTasks);
 
 function updateCompanion(): void {
   const state = getCompanionState(plannedTasks);
@@ -138,6 +141,7 @@ for (const task of plannedTasks) {
       ? completeMaterial.clone()
       : taskMaterial.clone();
 
+    saveSession(goal, plannedTasks);
     updateCompanion();
   });
 }
@@ -159,5 +163,9 @@ companion.addEventListener('pointerdown', () => {
   updateCompanion();
 });
 
-console.log('Roommate: touch the companion to begin your spatial workspace.');
+console.log(
+  memory.resumed
+    ? `Roommate: welcome back. Resuming your ${memory.goal || goal} workspace.`
+    : 'Roommate: touch the companion to begin your spatial workspace.',
+);
 console.log('Spatial Roommate companion reasoning ready', world);
