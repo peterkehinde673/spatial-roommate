@@ -77,6 +77,7 @@ const completeMaterial = new MeshStandardMaterial({
 });
 
 let sessionStarted = false;
+let completedTasks = 0;
 const taskCards: Mesh[] = [];
 const plannedTasks = planGoal('Build something worth returning to');
 
@@ -130,7 +131,9 @@ for (const task of plannedTasks) {
   });
 
   card.addEventListener('pointerdown', () => {
-    task.status = task.status === 'open' ? 'complete' : 'open';
+    const wasOpen = task.status === 'open';
+    task.status = wasOpen ? 'complete' : 'open';
+    completedTasks += wasOpen ? 1 : -1;
     card.material = task.status === 'complete'
       ? completeMaterial.clone()
       : taskMaterial.clone();
