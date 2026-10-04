@@ -103,9 +103,11 @@ const completeMaterial = new MeshStandardMaterial({
 });
 
 const taskCards: Mesh[] = [];
-const goal = 'Build something worth returning to';
+const goal =
+  new URLSearchParams(window.location.search).get('goal')?.trim() ||
+  'Build something worth returning to';
 const plannedTasks = planGoal(goal);
-const memory = loadSession(plannedTasks);
+const memory = loadSession(plannedTasks, goal);
 const initialSummary = summarizeSession(plannedTasks);
 let sessionStarted = memory.resumed;
 let completedTasks = plannedTasks.filter((task) => task.status === 'complete').length;
