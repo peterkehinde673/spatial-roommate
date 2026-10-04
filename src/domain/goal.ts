@@ -9,17 +9,23 @@ export function parseGoal(goal: string): GoalIntent {
   const normalized = raw.toLowerCase();
 
   const category =
-    /learn|study|understand|practice/.test(normalized)
+    /learn|study|understand|practice|read|course|skill/.test(normalized)
       ? 'learn'
-      : /plan|organize|schedule|prepare/.test(normalized)
+      : /plan|organize|schedule|prepare|week|project plan|roadmap/.test(normalized)
         ? 'plan'
-        : /build|create|make|ship|launch|design|code/.test(normalized)
+        : /build|create|make|ship|launch|design|code|app|website|prototype|project/.test(normalized)
           ? 'build'
           : 'general';
 
+  const focus = raw
+    ? raw.length > 72
+      ? `${raw.slice(0, 69).trimEnd()}...`
+      : raw
+    : 'Make progress on something meaningful';
+
   return {
     raw,
-    focus: raw || 'Make progress on something meaningful',
+    focus,
     category,
   };
 }
