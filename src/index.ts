@@ -256,6 +256,11 @@ function createTaskCards(): void {
     card.addEventListener('pointerdown', () => {
       const wasOpen = task.status === 'open';
       task.status = wasOpen ? 'complete' : 'open';
+
+      if (wasOpen) {
+        card.scale.setScalar(1.18);
+        setTimeout(() => updateTaskFocus(), 180);
+      }
       card.material = task.status === 'complete'
         ? completeMaterial.clone()
         : activeTaskMaterial.clone();
