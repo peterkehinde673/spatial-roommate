@@ -66,6 +66,18 @@ const wakeRing = new Mesh(
 wakeRing.position.copy(companion.position);
 root.add(wakeRing);
 
+const completionPulse = new Mesh(
+  new SphereGeometry(0.58, 24, 16),
+  new MeshStandardMaterial({
+    color: 0x4ade80,
+    emissive: 0x166534,
+    wireframe: true,
+  }),
+);
+completionPulse.position.copy(companion.position);
+completionPulse.visible = false;
+root.add(completionPulse);
+
 const companionEntity = world.createTransformEntity(companion);
 companionEntity.addComponent(RayInteractable);
 companionEntity.addComponent(PokeInteractable);
@@ -116,11 +128,13 @@ function updateCompanion(): void {
     companionMaterial.emissive.setHex(0x166534);
     deskMaterial.color.setHex(0x183b2b);
     completionRing.visible = true;
+    completionPulse.visible = true;
   } else if (state.mood === 'encouraging') {
     companionMaterial.color.setHex(0xfacc15);
     companionMaterial.emissive.setHex(0x713f12);
     deskMaterial.color.setHex(0x3b3518);
     completionRing.visible = false;
+    completionPulse.visible = false;
   } else {
     companionMaterial.color.setHex(0x7dd3fc);
     companionMaterial.emissive.setHex(0x164e63);
