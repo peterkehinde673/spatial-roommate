@@ -1,0 +1,23 @@
+{
+  "$schema": "./node_modules/@iwsdk/core/dist/schemas/iwsdk-project.v1.schema.json",
+  "version": "iwsdk.project.v1",
+  "world": {
+    "xr": {
+      "mode": "vr",
+      "offer": "always",
+      "features": {
+        "handTracking": true
+      }
+    },
+    "features": {
+      "locomotion": false,
+      "grabbing": true,
+      "spatialUI": true
+    }
+  },
+  "dev": {
+    "emulator": {
+      "device": "metaQuest3"
+    }
+  }
+}
