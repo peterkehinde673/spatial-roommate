@@ -91,12 +91,20 @@ const completeMaterial = new MeshStandardMaterial({
   emissive: 0x14532d,
 });
 
-let sessionStarted = false;
-let completedTasks = 0;
+let sessionStarted = memory.resumed;
+let completedTasks = plannedTasks.filter((task) => task.status === 'complete').length;
 const taskCards: Mesh[] = [];
 const goal = 'Build something worth returning to';
 const plannedTasks = planGoal(goal);
 const memory = loadSession(plannedTasks);
+
+if (memory.resumed) {
+  for (const task of plannedTasks) {
+    if (task.status === 'complete') {
+      // Restored task state is applied when its spatial card is created.
+    }
+  }
+}
 
 function updateTaskFocus(): void {
   const nextOpenId = plannedTasks.find((task) => task.status === 'open')?.id;
@@ -153,7 +161,10 @@ for (const task of plannedTasks) {
     taskMaterial.clone(),
   );
   card.position.set(...task.position);
-  card.visible = false;
+  card.visible = memory.resumed;
+  if (task.status === 'complete') {
+    card.material = completeMaterial.clone();
+  }
   taskCards.push(card);
 
   const entity = world.createTransformEntity(card);
