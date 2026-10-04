@@ -5,7 +5,6 @@ import {
   MeshStandardMaterial,
   RayInteractable,
   PokeInteractable,
-  Text,
   SphereGeometry,
   OneHandGrabbable,
   World,
@@ -71,11 +70,6 @@ const companionEntity = world.createTransformEntity(companion);
 companionEntity.addComponent(RayInteractable);
 companionEntity.addComponent(PokeInteractable);
 
-const progressText = new Text('0 / 3');
-progressText.position.set(-0.22, 1.72, -1.05);
-progressText.scale.setScalar(0.45);
-root.add(progressText);
-
 const light = new AmbientLight(0xffffff, 2);
 root.add(light);
 
@@ -119,8 +113,6 @@ function updateCompanion(): void {
     deskMaterial.color.setHex(0x243047);
     completionRing.visible = false;
   }
-
-  progressText.text = `${state.completed} / ${state.total}`;
 
   console.log(
     `Roommate [${state.mood}] ${state.message} Progress: ${state.completed}/${state.total}`,
