@@ -1,4 +1,5 @@
 import type { SpatialTask } from './tasks';
+import { parseGoal } from './goal';
 
 const taskTemplates: Array<Pick<SpatialTask, 'id' | 'title'>> = [
   { id: 'focus', title: 'Focus' },
@@ -7,7 +8,8 @@ const taskTemplates: Array<Pick<SpatialTask, 'id' | 'title'>> = [
 ];
 
 export function planGoal(goal: string): SpatialTask[] {
-  const normalizedGoal = goal.trim().replace(/\s+/g, ' ');
+  const intent = parseGoal(goal);
+  const normalizedGoal = intent.focus;
 
   if (!normalizedGoal) {
     return taskTemplates.map((task, index) => ({
