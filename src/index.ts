@@ -76,6 +76,19 @@ completionPulse.position.copy(companion.position);
 completionPulse.visible = false;
 root.add(completionPulse);
 
+const progressMarkers = [0, 1, 2].map((index) => {
+  const marker = new Mesh(
+    new SphereGeometry(0.055, 16, 12),
+    new MeshStandardMaterial({
+      color: 0x475569,
+      emissive: 0x0f172a,
+    }),
+  );
+  marker.position.set(-0.18 + index * 0.18, 1.68, -1.0);
+  root.add(marker);
+  return marker;
+});
+
 const companionEntity = world.createTransformEntity(companion);
 companionEntity.addComponent(RayInteractable);
 companionEntity.addComponent(PokeInteractable);
@@ -109,8 +122,22 @@ function updateTaskFocus(): void {
   }
 }
 
+function updateProgressMarkers(): void {
+  for (let index = 0; index < progressMarkers.length; index += 1) {
+    const marker = progressMarkers[index];
+    const task = plannedTasks[index];
+    const material = marker.material as MeshStandardMaterial;
+    const complete = task?.status === 'complete';
+
+    material.color.setHex(complete ? 0x4ade80 : 0x475569);
+    material.emissive.setHex(complete ? 0x166534 : 0x0f172a);
+    marker.scale.setScalar(complete ? 1.35 : 1);
+  }
+}
+
 function updateCompanion(): void {
   const state = getCompanionState(plannedTasks);
+  updateProgressMarkers();
 
   companion.scale.setScalar(
     state.mood === 'celebrating'
