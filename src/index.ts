@@ -22,8 +22,32 @@ if (!container) {
   throw new Error('Missing #scene-container');
 }
 
-const supportsWebXR = 'xr' in navigator;
-const runtimeOptions = supportsWebXR
+async function detectImmersiveVRSupport(): Promise<boolean> {
+  const xr = (navigator as Navigator & {
+    xr?: {
+      isSessionSupported?: (mode: string) => Promise<boolean>;
+    };
+  }).xr;
+
+  if (!xr?.isSessionSupported) return false;
+
+  try {
+    return await Promise.race([
+      xr.isSessionSupported('immersive-vr'),
+      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 1500)),
+    ]);
+  } catch {
+    return false;
+  }
+}
+
+const runtimeStatus = document.querySelector<HTMLDivElement>('#runtime-status');
+if (runtimeStatus) {
+  runtimeStatus.textContent = 'Detecting 3D browser support…';
+}
+
+const supportsImmersiveVR = await detectImmersiveVRSupport();
+const runtimeOptions = supportsImmersiveVR
   ? projectOptions
   : {
       ...projectOptions,
@@ -45,9 +69,8 @@ const runtimeOptions = supportsWebXR
       },
     };
 
-const runtimeStatus = document.querySelector<HTMLDivElement>('#runtime-status');
 if (runtimeStatus) {
-  runtimeStatus.textContent = supportsWebXR
+  runtimeStatus.textContent = supportsImmersiveVR
     ? 'Loading Spatial Roommate…'
     : 'Loading browser workspace…';
 }
