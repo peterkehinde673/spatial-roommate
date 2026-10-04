@@ -10,7 +10,7 @@ import {
 } from '@iwsdk/core';
 import projectOptions from 'virtual:iwsdk-project';
 import { getCompanionState } from './domain/companion';
-import { initialTasks } from './domain/tasks';
+import { planGoal } from './domain/planner';
 
 const container = document.querySelector<HTMLDivElement>('#scene-container');
 
@@ -78,9 +78,10 @@ const completeMaterial = new MeshStandardMaterial({
 
 let sessionStarted = false;
 const taskCards: Mesh[] = [];
+const plannedTasks = planGoal('Build something worth returning to');
 
 function updateCompanion(): void {
-  const state = getCompanionState(initialTasks);
+  const state = getCompanionState(plannedTasks);
 
   companion.scale.setScalar(
     state.mood === 'celebrating'
@@ -112,7 +113,7 @@ function updateCompanion(): void {
   );
 }
 
-for (const task of initialTasks) {
+for (const task of plannedTasks) {
   const card = new Mesh(
     new BoxGeometry(0.72, 0.42, 0.12),
     taskMaterial.clone(),
