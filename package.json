@@ -7,7 +7,8 @@
     "dev": "iwsdk dev up",
     "build": "vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check:production": "npm run typecheck && npm run build"
   },
   "dependencies": {
     "@iwsdk/core": "^1.0.0",
