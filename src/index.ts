@@ -200,6 +200,10 @@ function updateCompanion(): void {
   console.log(
     `Roommate [${state.mood}] ${state.message} Progress: ${state.completed}/${state.total}`,
   );
+
+  if (state.mood === 'encouraging') {
+    returnBeacon.visible = false;
+  }
 }
 
 function clearTaskCards(): void {
