@@ -155,11 +155,19 @@ function clearTaskCards(): void {
 function createTaskCards(): void {
   clearTaskCards();
 
-  for (const task of plannedTasks) {
+  const normalizedGoal = goal.toLowerCase();
+  const taskGeometry = normalizedGoal.includes('learn') || normalizedGoal.includes('skill')
+    ? new SphereGeometry(0.28, 20, 14)
+    : normalizedGoal.includes('plan') || normalizedGoal.includes('week')
+      ? new BoxGeometry(0.62, 0.62, 0.16)
+      : new BoxGeometry(0.72, 0.42, 0.12);
+
+  for (const [index, task] of plannedTasks.entries()) {
     const card = new Mesh(
-      new BoxGeometry(0.72, 0.42, 0.12),
+      taskGeometry.clone(),
       taskMaterial.clone(),
     );
+    card.rotation.y = index * 0.18;
     card.position.set(...task.position);
     card.visible = memory.resumed;
 
