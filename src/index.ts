@@ -21,9 +21,10 @@ if (!container) {
 const world = await World.create(container, projectOptions);
 const root = world.getPersistentRoot();
 
+const deskMaterial = new MeshStandardMaterial({ color: 0x243047 });
 const desk = new Mesh(
   new BoxGeometry(3.2, 0.12, 2.0),
-  new MeshStandardMaterial({ color: 0x243047 }),
+  deskMaterial,
 );
 desk.position.set(0, 1.0, -1.0);
 root.add(desk);
@@ -40,6 +41,18 @@ const companion = new Mesh(
 companion.position.set(0, 1.55, -1.0);
 root.add(companion);
 
+const completionRing = new Mesh(
+  new SphereGeometry(0.48, 24, 16),
+  new MeshStandardMaterial({
+    color: 0x22c55e,
+    emissive: 0x14532d,
+    wireframe: true,
+  }),
+);
+completionRing.position.copy(companion.position);
+completionRing.visible = false;
+root.add(completionRing);
+
 const light = new AmbientLight(0xffffff, 2);
 root.add(light);
 
@@ -52,17 +65,29 @@ const completeMaterial = new MeshStandardMaterial({
 function updateCompanion(): void {
   const state = getCompanionState(initialTasks);
 
-  companion.scale.setScalar(state.mood === 'celebrating' ? 1.35 : state.mood === 'encouraging' ? 1.15 : 1);
+  companion.scale.setScalar(
+    state.mood === 'celebrating'
+      ? 1.35
+      : state.mood === 'encouraging'
+        ? 1.15
+        : 1,
+  );
 
   if (state.mood === 'celebrating') {
     companionMaterial.color.setHex(0x4ade80);
     companionMaterial.emissive.setHex(0x166534);
+    deskMaterial.color.setHex(0x183b2b);
+    completionRing.visible = true;
   } else if (state.mood === 'encouraging') {
     companionMaterial.color.setHex(0xfacc15);
     companionMaterial.emissive.setHex(0x713f12);
+    deskMaterial.color.setHex(0x3b3518);
+    completionRing.visible = false;
   } else {
     companionMaterial.color.setHex(0x7dd3fc);
     companionMaterial.emissive.setHex(0x164e63);
+    deskMaterial.color.setHex(0x243047);
+    completionRing.visible = false;
   }
 
   console.log(
