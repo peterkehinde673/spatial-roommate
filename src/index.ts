@@ -9,6 +9,7 @@ import {
   World,
 } from '@iwsdk/core';
 import projectOptions from 'virtual:iwsdk-project';
+import { getCompanionState } from './domain/companion';
 import { initialTasks } from './domain/tasks';
 
 const container = document.querySelector<HTMLDivElement>('#scene-container');
@@ -27,9 +28,14 @@ const desk = new Mesh(
 desk.position.set(0, 1.0, -1.0);
 root.add(desk);
 
+const companionMaterial = new MeshStandardMaterial({
+  color: 0x7dd3fc,
+  emissive: 0x164e63,
+});
+
 const companion = new Mesh(
   new SphereGeometry(0.22, 24, 16),
-  new MeshStandardMaterial({ color: 0x7dd3fc, emissive: 0x164e63 }),
+  companionMaterial,
 );
 companion.position.set(0, 1.55, -1.0);
 root.add(companion);
@@ -42,6 +48,27 @@ const completeMaterial = new MeshStandardMaterial({
   color: 0x22c55e,
   emissive: 0x14532d,
 });
+
+function updateCompanion(): void {
+  const state = getCompanionState(initialTasks);
+
+  companion.scale.setScalar(state.mood === 'celebrating' ? 1.35 : state.mood === 'encouraging' ? 1.15 : 1);
+
+  if (state.mood === 'celebrating') {
+    companionMaterial.color.setHex(0x4ade80);
+    companionMaterial.emissive.setHex(0x166534);
+  } else if (state.mood === 'encouraging') {
+    companionMaterial.color.setHex(0xfacc15);
+    companionMaterial.emissive.setHex(0x713f12);
+  } else {
+    companionMaterial.color.setHex(0x7dd3fc);
+    companionMaterial.emissive.setHex(0x164e63);
+  }
+
+  console.log(
+    `Roommate [${state.mood}] ${state.message} Progress: ${state.completed}/${state.total}`,
+  );
+}
 
 for (const task of initialTasks) {
   const card = new Mesh(
@@ -63,18 +90,9 @@ for (const task of initialTasks) {
       ? completeMaterial.clone()
       : taskMaterial.clone();
 
-    const completed = initialTasks.filter((item) => item.status === 'complete').length;
-    console.log(
-      `Task "${task.title}" is now ${task.status}. Progress: ${completed}/${initialTasks.length}`,
-    );
-
-    if (completed === initialTasks.length) {
-      companion.scale.setScalar(1.35);
-      console.log('Spatial Roommate: all tasks complete');
-    } else {
-      companion.scale.setScalar(1);
-    }
+    updateCompanion();
   });
 }
 
-console.log('Spatial Roommate interaction loop ready', world);
+updateCompanion();
+console.log('Spatial Roommate companion reasoning ready', world);
