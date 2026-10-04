@@ -52,7 +52,7 @@ if (runtimeStatus) {
     : 'Loading browser workspace…';
 }
 
-let world;
+let world: Awaited<ReturnType<typeof World.create>>;
 try {
   world = await World.create(container, runtimeOptions);
   runtimeStatus?.remove();
