@@ -89,6 +89,18 @@ const progressMarkers = [0, 1, 2].map((index) => {
   return marker;
 });
 
+const returnBeacon = new Mesh(
+  new SphereGeometry(0.1, 18, 12),
+  new MeshStandardMaterial({
+    color: 0x38bdf8,
+    emissive: 0x0c4a6e,
+    wireframe: true,
+  }),
+);
+returnBeacon.position.set(0, 1.88, -1.0);
+returnBeacon.visible = false;
+root.add(returnBeacon);
+
 const companionEntity = world.createTransformEntity(companion);
 companionEntity.addComponent(RayInteractable);
 companionEntity.addComponent(PokeInteractable);
@@ -236,6 +248,8 @@ function createTaskCards(): void {
         goalPanel.visible = true;
         sessionStarted = false;
         wakeRing.visible = false;
+        returnBeacon.visible = true;
+        returnBeacon.scale.setScalar(1.35);
         console.log('Roommate: you finished this goal. Choose another goal when you are ready to return.');
       }
       console.log(
@@ -284,6 +298,7 @@ if (goalPanel) {
 
   const selectGoal = (selectedGoal: string) => {
     goalPanel.visible = false;
+    returnBeacon.visible = false;
     void startWorkspace(selectedGoal);
   };
 
