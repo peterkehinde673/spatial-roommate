@@ -83,6 +83,16 @@ const companionEntity = world.createTransformEntity(companion);
 companionEntity.addComponent(RayInteractable);
 companionEntity.addComponent(PokeInteractable);
 
+companion.addEventListener('pointerover', () => {
+  if (!sessionStarted) {
+    wakeRing.scale.setScalar(1.15);
+  }
+});
+
+companion.addEventListener('pointerout', () => {
+  wakeRing.scale.setScalar(1);
+});
+
 const light = new AmbientLight(0xffffff, 2);
 root.add(light);
 
@@ -196,6 +206,7 @@ companion.addEventListener('pointerdown', () => {
 
   sessionStarted = true;
   wakeRing.visible = false;
+  companion.scale.setScalar(1.08);
 
   for (const card of taskCards) {
     card.visible = true;
