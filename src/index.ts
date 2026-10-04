@@ -13,6 +13,7 @@ import projectOptions from 'virtual:iwsdk-project';
 import { getCompanionState } from './domain/companion';
 import { planGoal } from './domain/planner';
 import { loadSession, saveSession } from './domain/memory';
+import { summarizeSession } from './domain/session';
 
 const container = document.querySelector<HTMLDivElement>('#scene-container');
 
@@ -175,6 +176,12 @@ for (const task of plannedTasks) {
       : taskMaterial.clone();
 
     saveSession(goal, plannedTasks);
+    const summary = summarizeSession(plannedTasks);
+    console.log(
+      summary.finished
+        ? 'Roommate: session complete. Come back when you are ready for the next goal.'
+        : `Roommate: ${summary.remaining} step${summary.remaining === 1 ? '' : 's'} left${summary.nextTask ? ` — next: ${summary.nextTask}` : ''}.`,
+    );
     updateTaskFocus();
     updateCompanion();
   });
