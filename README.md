@@ -1,10 +1,60 @@
 # Spatial Roommate
 
-A spatial AI productivity experience built for the Meta VR Start Developer Competition 2026.
+A spatial AI productivity companion built for the **Meta VR Start Developer Competition 2026**.
 
-## Current direction
+## The idea
 
-Spatial Roommate turns a user's workspace into an interactive spatial task environment. The experience is being designed around hands-first interaction, spatial objects, an AI companion, and persistent progression.
+ROOMMATE turns the user's physical environment into a living task workspace.
+
+Instead of opening a conventional productivity app, the user:
+
+1. Chooses what they want to accomplish.
+2. Meets the Roommate companion.
+3. Gets a goal-shaped spatial plan.
+4. Manipulates physical task objects with hands or ray interaction.
+5. Sees the room react as progress is made.
+6. Returns later and continues where they left off.
+7. Starts a new goal after completing a session.
+
+The core loop is:
+
+**Goal → Understand → Plan → Spatial action → Progress → Remember → Return**
+
+## What is implemented
+
+### Spatial onboarding
+
+The first experience presents three goal directions:
+
+- **Build** — make something concrete.
+- **Learn** — practice a skill.
+- **Plan** — organize what comes next.
+
+### Goal-aware planning
+
+Roommate classifies natural goal language into Build, Learn, Plan, or General intent and generates a three-step spatial sequence.
+
+Examples:
+
+- Build → Focus → Build → Ship
+- Learn → Question → Practice → Recall
+- Plan → Define → Organize → Next step
+
+### Hands-first interaction
+
+Task objects support direct hand/poke interaction, ray interaction, and one-hand grabbing and translation.
+
+### Reactive environment
+
+Progress changes the spatial environment: task objects change state, the next task is emphasized, progress markers respond, the companion changes mood, the desk changes appearance, completion produces a spatial pulse, and a return beacon appears after finishing.
+
+### Persistent memory
+
+The current goal and task completion state are stored locally so the experience can resume a previous workspace when the same goal returns.
+
+### Return loop
+
+Completing a workspace does not end the experience. Roommate presents the goal selector again, creating a repeatable **complete → choose again → return** loop.
 
 ## Technology
 
@@ -16,35 +66,31 @@ Spatial Roommate turns a user's workspace into an interactive spatial task envir
 - GitHub Actions
 - GitHub Pages
 
-## Development model
+## Development and verification
 
-The repository is intentionally GitHub-first. Dependency installation, typechecking, production builds, and deployment run in GitHub Actions so the local Termux environment stays lightweight.
+The repository is intentionally GitHub-first. CI handles dependency installation, typechecking, and production builds.
 
-## Local development
+Commands verified by CI:
 
-Node.js 24+ is recommended by the current IWSDK documentation.
+- `npm install`
+- `npm run typecheck`
+- `npm run build`
 
-```bash
-npm install
-npm run dev
-```
+The project also has a dedicated Phase 3 verification workflow and automatic GitHub Pages deployment.
 
-For CI, GitHub Actions installs dependencies and runs:
+## Competition positioning
 
-```bash
-npm run typecheck
-npm run build
-```
+**Primary division:** Productivity
 
-## Competition
+Strong potential alignment:
 
-Target division: Productivity.
+- **Best Agentic Interaction** — goal interpretation drives planning and spatial behavior.
+- **Best Reason to Come Back** — persistent progress and a new-goal return loop.
+- **Best First Five Minutes** — spatial onboarding quickly gets the user into the core interaction.
+- **Boldest Original Concept** — productivity work becomes part of the physical/spatial environment.
 
-Potential special-award alignment:
+## Project status
 
-- Best Agentic Interaction
-- Best Reason to Come Back
-- Best First Five Minutes
-- Boldest Original Concept
+Core development is approaching feature freeze. The next stage is final QA, production/demo verification, visual capture, video preparation, and Devpost submission.
 
 This repository is an original project for the competition.
