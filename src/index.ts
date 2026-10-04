@@ -4,6 +4,7 @@ import {
   Mesh,
   MeshStandardMaterial,
   RayInteractable,
+  PokeInteractable,
   SphereGeometry,
   OneHandGrabbable,
   World,
@@ -67,6 +68,7 @@ root.add(wakeRing);
 
 const companionEntity = world.createTransformEntity(companion);
 companionEntity.addComponent(RayInteractable);
+companionEntity.addComponent(PokeInteractable);
 
 const light = new AmbientLight(0xffffff, 2);
 root.add(light);
