@@ -96,6 +96,7 @@ const taskCards: Mesh[] = [];
 const goal = 'Build something worth returning to';
 const plannedTasks = planGoal(goal);
 const memory = loadSession(plannedTasks);
+const initialSummary = summarizeSession(plannedTasks);
 let sessionStarted = memory.resumed;
 let completedTasks = plannedTasks.filter((task) => task.status === 'complete').length;
 
@@ -207,7 +208,7 @@ companion.addEventListener('pointerdown', () => {
 
 console.log(
   memory.resumed
-    ? `Roommate: welcome back. Resuming your ${memory.goal || goal} workspace.`
+    ? `Roommate: welcome back. Resuming your ${memory.goal || goal} workspace. ${initialSummary.completed}/${initialSummary.total} steps complete.`
     : 'Roommate: touch the companion to begin your spatial workspace.',
 );
 console.log('Spatial Roommate companion reasoning ready', world);
