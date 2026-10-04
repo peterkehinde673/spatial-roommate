@@ -86,6 +86,20 @@ const goal = 'Build something worth returning to';
 const plannedTasks = planGoal(goal);
 const memory = loadSession(plannedTasks);
 
+function updateTaskFocus(): void {
+  const nextOpenId = plannedTasks.find((task) => task.status === 'open')?.id;
+
+  for (let index = 0; index < plannedTasks.length; index += 1) {
+    const task = plannedTasks[index];
+    const card = taskCards[index];
+    if (!card) continue;
+
+    card.scale.setScalar(
+      task.status === 'complete' ? 0.9 : task.id === nextOpenId ? 1.12 : 1,
+    );
+  }
+}
+
 function updateCompanion(): void {
   const state = getCompanionState(plannedTasks);
 
@@ -144,6 +158,7 @@ for (const task of plannedTasks) {
       : taskMaterial.clone();
 
     saveSession(goal, plannedTasks);
+    updateTaskFocus();
     updateCompanion();
   });
 }
@@ -162,6 +177,7 @@ companion.addEventListener('pointerdown', () => {
   }
 
   console.log('Roommate: welcome back. Your workspace is ready.');
+  updateTaskFocus();
   updateCompanion();
 });
 
