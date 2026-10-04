@@ -192,6 +192,17 @@ function createTaskCards(): void {
         : taskMaterial.clone();
 
       saveSession(goal, plannedTasks);
+      if (wasOpen) {
+        const pulse = completionPulse;
+        pulse.visible = true;
+        pulse.scale.setScalar(0.7);
+        setTimeout(() => {
+          pulse.scale.setScalar(1.15);
+        }, 120);
+        setTimeout(() => {
+          pulse.scale.setScalar(1);
+        }, 280);
+      }
       const summary = summarizeSession(plannedTasks);
       console.log(
         summary.finished
