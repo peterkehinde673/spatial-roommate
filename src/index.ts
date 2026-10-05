@@ -22,68 +22,49 @@ if (!container) {
   throw new Error('Missing #scene-container');
 }
 
-async function detectImmersiveVRSupport(): Promise<boolean> {
-  const xr = (navigator as Navigator & {
-    xr?: {
-      isSessionSupported?: (mode: string) => Promise<boolean>;
-    };
-  }).xr;
-
-  if (!xr?.isSessionSupported) return false;
-
-  try {
-    return await Promise.race([
-      xr.isSessionSupported('immersive-vr'),
-      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 1500)),
-    ]);
-  } catch {
-    return false;
-  }
-}
-
 const runtimeStatus = document.querySelector<HTMLDivElement>('#runtime-status');
 if (runtimeStatus) {
-  runtimeStatus.textContent = 'Detecting 3D browser support…';
+  runtimeStatus.textContent = 'Starting browser workspace…';
 }
 
-const supportsImmersiveVR = await detectImmersiveVRSupport();
-const runtimeOptions = supportsImmersiveVR
-  ? projectOptions
-  : {
-      ...projectOptions,
-      xr: false,
-      input: {
-        canvasPointerEvents: true,
-      },
-      features: {
-        grabbing: true,
-        locomotion: {
-          browserControls: true,
-        },
-      },
-      render: {
-        camera: {
-          position: [0, 1.55, 0],
-          lookAt: [0, 1.35, -1],
-        },
-      },
-    };
-
-if (runtimeStatus) {
-  runtimeStatus.textContent = supportsImmersiveVR
-    ? 'Loading Spatial Roommate…'
-    : 'Loading browser workspace…';
-}
+// Always initialize the browser renderer first. Some mobile browsers expose
+// WebXR support without being able to initialize an immersive session here.
+// The same world can opt into XR later from an explicit user gesture.
+const runtimeOptions = {
+  ...projectOptions,
+  xr: false,
+  input: {
+    canvasPointerEvents: true,
+  },
+  features: {
+    grabbing: true,
+    spatialUI: true,
+    locomotion: {
+      browserControls: true,
+    },
+  },
+  render: {
+    camera: {
+      position: [0, 1.55, 3.8],
+      lookAt: [0, 1.3, -1],
+    },
+  },
+};
 
 let world: Awaited<ReturnType<typeof World.create>>;
 try {
-  world = await World.create(container, runtimeOptions);
+  world = await Promise.race([
+    World.create(container, runtimeOptions),
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('3D runtime initialization timed out after 12 seconds')), 12000),
+    ),
+  ]);
   runtimeStatus?.remove();
 } catch (error) {
   console.error('Spatial Roommate failed to initialize', error);
   if (runtimeStatus) {
-    runtimeStatus.textContent =
-      'Spatial Roommate could not start on this browser. Try Chrome or Meta Quest Browser.';
+    const details = error instanceof Error ? error.message : String(error);
+    runtimeStatus.textContent = `Workspace startup failed: ${details}. Reload this page or open it in Chrome.`;
     runtimeStatus.classList.add('error');
   }
   throw error;
