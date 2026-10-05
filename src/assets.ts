@@ -8,6 +8,5 @@ export default defineAssets({
     name: 'Goal selection panel',
     type: AssetType.UIKitML,
     url: publicAssetUrl('ui/goal-panel.uikitml'),
-    priority: 'lazy',
   },
 });
