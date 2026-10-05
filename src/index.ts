@@ -321,7 +321,7 @@ function createTaskCards(): void {
       }
       const summary = summarizeSession(plannedTasks);
       if (summary.finished && goalPanel) {
-        goalPanel.visible = true;
+        goalPanel.style.display = 'grid';
         sessionStarted = false;
         wakeRing.visible = false;
         returnBeacon.visible = true;
@@ -376,8 +376,7 @@ if (!goal) {
   document.body.appendChild(goalPanel);
 
   const selectGoal = (selectedGoal: string) => {
-    goalPanel?.remove();
-    goalPanel = null;
+    if (goalPanel) goalPanel.style.display = 'none';
     returnBeacon.visible = false;
     void startWorkspace(selectedGoal);
   };
