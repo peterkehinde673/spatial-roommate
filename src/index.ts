@@ -29,15 +29,14 @@ if (runtimeStatus) {
 // WebXR support without being able to initialize an immersive session here.
 // The same world can opt into XR later from an explicit user gesture.
 const runtimeOptions = {
+  // Start with the smallest browser-safe IWSDK runtime. Spatial UI,
+  // locomotion and grabbing are enabled later only when the app is in XR.
   xr: false as const,
   input: {
     canvasPointerEvents: true,
   },
   features: {
-    grabbing: true,
-    locomotion: {
-      browserControls: true,
-    },
+    spatialUI: false,
   },
   render: {
     camera: {
