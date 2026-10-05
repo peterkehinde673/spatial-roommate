@@ -6,11 +6,9 @@ import {
   PokeInteractable,
   RayInteractable,
   SphereGeometry,
-  UIKitMLAsset,
   OneHandGrabbable,
   World,
 } from '@iwsdk/core';
-import projectOptions from 'virtual:iwsdk-project';
 import { getCompanionState } from './domain/companion';
 import { planGoal } from './domain/planner';
 import { getStoredGoal, loadSession, saveSession } from './domain/memory';
@@ -31,14 +29,12 @@ if (runtimeStatus) {
 // WebXR support without being able to initialize an immersive session here.
 // The same world can opt into XR later from an explicit user gesture.
 const runtimeOptions = {
-  ...projectOptions,
   xr: false as const,
   input: {
     canvasPointerEvents: true,
   },
   features: {
     grabbing: true,
-    spatialUI: true,
     locomotion: {
       browserControls: true,
     },
@@ -172,7 +168,7 @@ let plannedTasks = planGoal(goal || 'Choose a goal');
 let memory = goal ? loadSession(plannedTasks, goal) : { goal: '', resumed: false };
 let sessionStarted = memory.resumed;
 const taskCards: Mesh[] = [];
-let goalPanel: UIKitMLAsset | null = null;
+let goalPanel: HTMLDivElement | null = null;
 
 function updateTaskFocus(): void {
   const nextOpenId = plannedTasks.find((task) => task.status === 'open')?.id;
@@ -365,37 +361,38 @@ async function startWorkspace(selectedGoal: string): Promise<void> {
   }
 }
 
-goalPanel = !goal
-  ? await world.assets.instantiate<UIKitMLAsset>('goal-panel')
-  : null;
-
-if (goalPanel) {
-  const goalPanelEntity = world.createTransformEntity(goalPanel);
-  goalPanelEntity.object3D!.position.set(0, 1.55, -1.65);
-  goalPanelEntity.object3D!.scale.setScalar(0.25);
-  goalPanelEntity.addComponent(RayInteractable);
-  goalPanelEntity.addComponent(PokeInteractable);
+if (!goal) {
+  goalPanel = document.createElement('div');
+  goalPanel.className = 'goal-panel';
+  goalPanel.innerHTML = `
+    <div class="goal-panel-card">
+      <div class="goal-panel-title">What are we working on?</div>
+      <div class="goal-panel-subtitle">Choose a direction and Roommate will shape the spatial workspace around it.</div>
+      <button data-goal="Build a portfolio project">Build something</button>
+      <button data-goal="Learn a new skill">Learn a skill</button>
+      <button data-goal="Plan a productive week">Plan something</button>
+    </div>
+  `;
+  document.body.appendChild(goalPanel);
 
   const selectGoal = (selectedGoal: string) => {
-    goalPanel.visible = false;
+    goalPanel?.remove();
+    goalPanel = null;
     returnBeacon.visible = false;
     void startWorkspace(selectedGoal);
   };
 
-  goalPanel.requireElementById('build-goal').addEventListener('click', () => {
-    selectGoal('Build a portfolio project');
-  });
-  goalPanel.requireElementById('learn-goal').addEventListener('click', () => {
-    selectGoal('Learn a new skill');
-  });
-  goalPanel.requireElementById('plan-goal').addEventListener('click', () => {
-    selectGoal('Plan a productive week');
+  goalPanel.querySelectorAll<HTMLButtonElement>('button[data-goal]').forEach((button) => {
+    button.addEventListener('click', () => {
+      selectGoal(button.dataset.goal ?? '');
+    });
   });
 
-  console.log('Roommate: choose a goal from the spatial panel.');
+  console.log('Roommate: choose a goal from the browser goal panel.');
 } else {
   await startWorkspace(goal);
 }
+
 
 companion.addEventListener('pointerover', () => {
   if (!sessionStarted) {
