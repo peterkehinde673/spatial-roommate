@@ -45,8 +45,8 @@ const runtimeOptions = {
   },
   render: {
     camera: {
-      position: [0, 1.55, 3.8],
-      lookAt: [0, 1.3, -1],
+      position: [0, 1.55, 3.8] as [number, number, number],
+      lookAt: [0, 1.3, -1] as [number, number, number],
     },
   },
 };
