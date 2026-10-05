@@ -102,7 +102,12 @@ if (isQuestBrowser) {
     raycaster.setFromCamera(pointer, browserCamera);
     const hits = raycaster.intersectObjects(browserScene.children, true);
     const target = hits[0]?.object;
-    if (target) target.dispatchEvent({ type: 'pointerdown', nativeEvent: event });
+    if (target) {
+      target.dispatchEvent({
+        type: 'pointerdown',
+        nativeEvent: event,
+      } as never);
+    }
   });
 
   browserRenderer.setAnimationLoop(() => {
