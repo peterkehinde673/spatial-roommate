@@ -9,6 +9,13 @@ import {
   OneHandGrabbable,
   World,
 } from '@iwsdk/core';
+import {
+  PerspectiveCamera,
+  Raycaster,
+  Scene,
+  Vector2,
+  WebGLRenderer,
+} from 'three';
 import { getCompanionState } from './domain/companion';
 import { planGoal } from './domain/planner';
 import { getStoredGoal, loadSession, saveSession } from './domain/memory';
@@ -25,46 +32,88 @@ if (runtimeStatus) {
   runtimeStatus.textContent = 'Starting browser workspace…';
 }
 
-// Always initialize the browser renderer first. Some mobile browsers expose
-// WebXR support without being able to initialize an immersive session here.
-// The same world can opt into XR later from an explicit user gesture.
-const runtimeOptions = {
-  // Start with the smallest browser-safe IWSDK runtime. Spatial UI,
-  // locomotion and grabbing are enabled later only when the app is in XR.
-  xr: false as const,
-  input: {
-    canvasPointerEvents: true,
-  },
-  features: {
-    spatialUI: false,
-  },
-  render: {
-    camera: {
-      position: [0, 1.55, 3.8] as [number, number, number],
-      lookAt: [0, 1.3, -1] as [number, number, number],
-    },
-  },
-};
+// GitHub Pages is also the public phone/desktop demo. IWSDK's full
+// initialization is intended for XR browsers and can stall on some mobile
+// WebGL environments. Use a tiny native Three.js preview there, while Quest
+// browsers continue to use the real IWSDK runtime.
+const isQuestBrowser =
+  typeof navigator !== 'undefined' &&
+  /OculusBrowser|Quest/i.test(navigator.userAgent);
 
-let world: Awaited<ReturnType<typeof World.create>>;
-try {
-  world = await Promise.race([
-    World.create(container, runtimeOptions),
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('3D runtime initialization timed out after 12 seconds')), 12000),
-    ),
-  ]);
-  runtimeStatus?.remove();
-} catch (error) {
-  console.error('Spatial Roommate failed to initialize', error);
-  if (runtimeStatus) {
-    const details = error instanceof Error ? error.message : String(error);
-    runtimeStatus.textContent = `Workspace startup failed: ${details}. Reload this page or open it in Chrome.`;
-    runtimeStatus.classList.add('error');
+let world: Awaited<ReturnType<typeof World.create>> | null = null;
+let browserRenderer: WebGLRenderer | null = null;
+let browserCamera: PerspectiveCamera | null = null;
+let browserScene: Scene | null = null;
+
+if (isQuestBrowser) {
+  const runtimeOptions = {
+    xr: false as const,
+    input: { canvasPointerEvents: true },
+    features: { spatialUI: false },
+    render: {
+      camera: {
+        position: [0, 1.55, 3.8] as [number, number, number],
+        lookAt: [0, 1.3, -1] as [number, number, number],
+      },
+    },
+  };
+
+  try {
+    world = await Promise.race([
+      World.create(container, runtimeOptions),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('IWSDK initialization timed out after 12 seconds')), 12000),
+      ),
+    ]);
+  } catch (error) {
+    console.error('Spatial Roommate IWSDK failed to initialize', error);
+    if (runtimeStatus) {
+      const details = error instanceof Error ? error.message : String(error);
+      runtimeStatus.textContent = 'Quest runtime startup failed: ' + details;
+      runtimeStatus.classList.add('error');
+    }
+    throw error;
   }
-  throw error;
+} else {
+  browserScene = new Scene();
+  browserCamera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200);
+  browserCamera.position.set(0, 1.55, 3.8);
+  browserCamera.lookAt(0, 1.3, -1);
+
+  browserRenderer = new WebGLRenderer({ antialias: true, alpha: false });
+  browserRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  browserRenderer.setSize(window.innerWidth, window.innerHeight);
+  container.appendChild(browserRenderer.domElement);
+
+  window.addEventListener('resize', () => {
+    if (!browserCamera || !browserRenderer) return;
+    browserCamera.aspect = window.innerWidth / window.innerHeight;
+    browserCamera.updateProjectionMatrix();
+    browserRenderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  const raycaster = new Raycaster();
+  const pointer = new Vector2();
+  browserRenderer.domElement.addEventListener('pointerdown', (event) => {
+    if (!browserCamera || !browserRenderer || !browserScene) return;
+    const rect = browserRenderer.domElement.getBoundingClientRect();
+    pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(pointer, browserCamera);
+    const hits = raycaster.intersectObjects(browserScene.children, true);
+    const target = hits[0]?.object;
+    if (target) target.dispatchEvent({ type: 'pointerdown', nativeEvent: event });
+  });
+
+  browserRenderer.setAnimationLoop(() => {
+    if (browserRenderer && browserCamera && browserScene) {
+      browserRenderer.render(browserScene, browserCamera);
+    }
+  });
+  runtimeStatus?.remove();
 }
-const root = world.getPersistentRoot();
+
+const root = world ? world.getPersistentRoot() : browserScene!;
 
 const deskMaterial = new MeshStandardMaterial({ color: 0x243047 });
 const desk = new Mesh(new BoxGeometry(3.2, 0.12, 2.0), deskMaterial);
@@ -142,9 +191,11 @@ returnBeacon.position.set(0, 1.88, -1.0);
 returnBeacon.visible = false;
 root.add(returnBeacon);
 
-const companionEntity = world.createTransformEntity(companion);
-companionEntity.addComponent(RayInteractable);
-companionEntity.addComponent(PokeInteractable);
+if (world) {
+  const companionEntity = world.createTransformEntity(companion);
+  companionEntity.addComponent(RayInteractable);
+  companionEntity.addComponent(PokeInteractable);
+}
 
 const light = new AmbientLight(0xffffff, 2);
 root.add(light);
@@ -287,12 +338,14 @@ function createTaskCards(): void {
 
     taskCards.push(card);
 
-    const entity = world.createTransformEntity(card);
-    entity.addComponent(RayInteractable);
-    entity.addComponent(OneHandGrabbable, {
-      translate: true,
-      rotate: false,
-    });
+    if (world) {
+      const entity = world.createTransformEntity(card);
+      entity.addComponent(RayInteractable);
+      entity.addComponent(OneHandGrabbable, {
+        translate: true,
+        rotate: false,
+      });
+    }
 
     card.addEventListener('pointerdown', () => {
       const wasOpen = task.status === 'open';
@@ -426,4 +479,6 @@ companion.addEventListener('pointerdown', () => {
   updateCompanion();
 });
 
-console.log('Spatial Roommate companion reasoning ready', world);
+console.log('Spatial Roommate companion reasoning ready', {
+  runtime: world ? 'IWSDK XR' : 'Three.js browser preview',
+});
