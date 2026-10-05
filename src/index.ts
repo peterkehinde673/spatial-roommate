@@ -32,7 +32,7 @@ if (runtimeStatus) {
 // The same world can opt into XR later from an explicit user gesture.
 const runtimeOptions = {
   ...projectOptions,
-  xr: false,
+  xr: false as const,
   input: {
     canvasPointerEvents: true,
   },
