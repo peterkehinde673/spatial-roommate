@@ -272,7 +272,7 @@ function updateTaskFocus(): void {
     if (!card) continue;
 
     card.scale.setScalar(
-      task.status === 'complete' ? 0.9 : task.id === nextOpenId ? 1.12 : 1,
+      task.status === 'complete' ? 1.08 : task.id === nextOpenId ? 1.16 : 0.92,
     );
   }
 }
@@ -372,12 +372,16 @@ function createTaskCards(): void {
       activeTaskMaterial.clone(),
     );
     card.userData.roommateInteractive = true;
-    card.rotation.y = index * 0.18;
-    card.position.set(...task.position);
+    card.rotation.y = index * 0.12;
+    card.position.set(-1.1 + index * 1.1, 1.18, -1.05);
     card.visible = memory.resumed;
 
     if (task.status === 'complete') {
       card.material = completeMaterial.clone();
+    } else if (index === plannedTasks.findIndex((candidate) => candidate.status === 'open')) {
+      const nextMaterial = (activeTaskMaterial.clone() as MeshStandardMaterial);
+      nextMaterial.emissive.setHex(0x172554);
+      card.material = nextMaterial;
     }
 
     taskCards.push(card);
@@ -398,19 +402,14 @@ function createTaskCards(): void {
     }
 
     card.addEventListener('pointerdown', () => {
-      const wasOpen = task.status === 'open';
-      task.status = wasOpen ? 'complete' : 'open';
+      if (task.status !== 'open') return;
 
-      if (wasOpen) {
-        card.scale.setScalar(1.18);
-        setTimeout(() => updateTaskFocus(), 180);
-      }
-      card.material = task.status === 'complete'
-        ? completeMaterial.clone()
-        : activeTaskMaterial.clone();
+      task.status = 'complete';
+      card.scale.setScalar(1.08);
+      card.material = completeMaterial.clone();
 
       saveSession(goal, plannedTasks);
-      if (wasOpen) {
+      {
         const pulse = completionPulse;
         pulse.visible = true;
         pulse.scale.setScalar(0.7);
