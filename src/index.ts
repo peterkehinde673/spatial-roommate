@@ -379,6 +379,33 @@ function clearTaskCards(): void {
   taskCards.length = 0;
 }
 
+function showGoalPanel(): void {
+  if (!goalPanel) {
+    goalPanel = document.createElement('div');
+    goalPanel.className = 'goal-panel';
+    document.body.appendChild(goalPanel);
+  }
+
+  goalPanel.innerHTML = `
+    <div class="goal-panel-card">
+      <div class="goal-panel-title">What comes next?</div>
+      <div class="goal-panel-subtitle">You finished this workspace. Choose another direction and Roommate will build the next spatial plan.</div>
+      <button data-goal="Build a portfolio project">Build something</button>
+      <button data-goal="Learn a new skill">Learn a skill</button>
+      <button data-goal="Plan a productive week">Plan something</button>
+    </div>
+  `;
+  goalPanel.style.display = 'grid';
+
+  goalPanel.querySelectorAll<HTMLButtonElement>('button[data-goal]').forEach((button) => {
+    button.addEventListener('click', () => {
+      goalPanel?.style.setProperty('display', 'none');
+      returnBeacon.visible = false;
+      void startWorkspace(button.dataset.goal ?? '');
+    });
+  });
+}
+
 function completeTask(index: number): void {
   const task = plannedTasks[index];
   const card = taskCards[index];
@@ -401,7 +428,7 @@ function completeTask(index: number): void {
     wakeRing.visible = false;
     returnBeacon.visible = true;
     returnBeacon.scale.setScalar(1.35);
-    if (goalPanel) goalPanel.style.display = 'grid';
+    showGoalPanel();
     console.log('Roommate: you finished this goal. Choose another goal when you are ready to return.');
   } else {
     console.log(
@@ -506,31 +533,16 @@ hud.className = 'roommate-hud';
 document.body.appendChild(hud);
 
 if (!goal) {
-  goalPanel = document.createElement('div');
-  goalPanel.className = 'goal-panel';
-  goalPanel.innerHTML = `
-    <div class="goal-panel-card">
-      <div class="goal-panel-title">What are we working on?</div>
-      <div class="goal-panel-subtitle">Choose a direction and Roommate will shape the spatial workspace around it.</div>
-      <button data-goal="Build a portfolio project">Build something</button>
-      <button data-goal="Learn a new skill">Learn a skill</button>
-      <button data-goal="Plan a productive week">Plan something</button>
-    </div>
-  `;
-  document.body.appendChild(goalPanel);
-
-  const selectGoal = (selectedGoal: string) => {
-    if (goalPanel) goalPanel.style.display = 'none';
-    returnBeacon.visible = false;
-    void startWorkspace(selectedGoal);
-  };
-
-  goalPanel.querySelectorAll<HTMLButtonElement>('button[data-goal]').forEach((button) => {
-    button.addEventListener('click', () => {
-      selectGoal(button.dataset.goal ?? '');
-    });
-  });
-
+  showGoalPanel();
+  if (goalPanel) {
+    const title = goalPanel.querySelector('.goal-panel-title');
+    const subtitle = goalPanel.querySelector('.goal-panel-subtitle');
+    if (title) title.textContent = 'What are we working on?';
+    if (subtitle) {
+      subtitle.textContent =
+        'Choose a direction and Roommate will shape the spatial workspace around it.';
+    }
+  }
   console.log('Roommate: choose a goal from the browser goal panel.');
 } else {
   await startWorkspace(goal);
