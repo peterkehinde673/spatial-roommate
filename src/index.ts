@@ -583,6 +583,44 @@ companion.addEventListener('pointerdown', () => {
   companion.userData.roommateAction?.();
 });
 
+let companionPulseTime = 0;
+
+function animateCompanion(deltaSeconds: number): void {
+  if (!goal || !companion.visible) return;
+
+  companionPulseTime += deltaSeconds;
+  const state = getCompanionState(plannedTasks);
+  const baseScale =
+    state.mood === 'celebrating'
+      ? 1.35
+      : state.mood === 'encouraging'
+        ? 1.15
+        : sessionStarted
+          ? 1.08
+          : 1;
+
+  const breathing = 1 + Math.sin(companionPulseTime * 2.4) * 0.035;
+  companion.scale.setScalar(baseScale * breathing);
+
+  if (!sessionStarted && state.mood === 'ready') {
+    const ringScale = 1 + Math.sin(companionPulseTime * 2.8) * 0.08;
+    wakeRing.scale.setScalar(ringScale);
+  }
+}
+
+if (browserRenderer) {
+  let lastFrame = performance.now();
+  browserRenderer.setAnimationLoop((time) => {
+    const deltaSeconds = Math.min((time - lastFrame) / 1000, 0.05);
+    lastFrame = time;
+    animateCompanion(deltaSeconds);
+
+    if (browserRenderer && browserCamera && browserScene) {
+      browserRenderer.render(browserScene, browserCamera);
+    }
+  });
+}
+
 console.log('Spatial Roommate companion reasoning ready', {
   runtime: world ? 'IWSDK XR' : 'Three.js browser preview',
 });
