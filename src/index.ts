@@ -186,6 +186,7 @@ companion.userData.roommateAction = () => {
   console.log('Roommate: welcome. Your workspace is ready.');
   updateTaskFocus();
   updateCompanion();
+  updateHud();
 };
 companion.position.set(0, 1.55, -1.0);
 root.add(companion);
@@ -278,6 +279,19 @@ let memory = goal ? loadSession(plannedTasks, goal) : { goal: '', resumed: false
 let sessionStarted = memory.resumed;
 const taskCards: Mesh[] = [];
 let goalPanel: HTMLDivElement | null = null;
+let hud: HTMLDivElement | null = null;
+
+function updateHud(): void {
+  if (!hud || !goal) return;
+  const summary = summarizeSession(plannedTasks);
+  hud.innerHTML = `
+    <div class="roommate-hud-card">
+      <div class="roommate-hud-goal">${goal}</div>
+      <div class="roommate-hud-progress">Progress ${summary.completed}/${summary.total}</div>
+    </div>
+    <div class="roommate-hud-hint">${summary.finished ? 'Goal complete' : sessionStarted ? 'Tap the next task' : 'Tap Roommate to begin'}</div>
+  `;
+}
 
 function updateTaskFocus(): void {
   const nextOpenId = plannedTasks.find((task) => task.status === 'open')?.id;
@@ -319,6 +333,7 @@ function updateProgressMarkers(): void {
 function updateCompanion(): void {
   const state = getCompanionState(plannedTasks);
   updateProgressMarkers();
+  updateHud();
 
   companion.scale.setScalar(
     state.mood === 'celebrating'
@@ -485,6 +500,10 @@ async function startWorkspace(selectedGoal: string): Promise<void> {
     console.log('Roommate: touch the companion to begin your spatial workspace.');
   }
 }
+
+hud = document.createElement('div');
+hud.className = 'roommate-hud';
+document.body.appendChild(hud);
 
 if (!goal) {
   goalPanel = document.createElement('div');
