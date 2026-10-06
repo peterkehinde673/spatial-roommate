@@ -108,10 +108,15 @@ if (isQuestBrowser) {
       (hit) => hit.object.userData.roommateInteractive === true,
     )?.object;
     if (target) {
-      target.dispatchEvent({
-        type: 'pointerdown',
-        nativeEvent: event,
-      } as never);
+      const action = (target.userData as { roommateAction?: () => void }).roommateAction;
+      if (action) {
+        action();
+      } else {
+        target.dispatchEvent({
+          type: 'pointerdown',
+          nativeEvent: event,
+        } as never);
+      }
     }
   });
 
@@ -139,6 +144,18 @@ const companion = new Mesh(
   companionMaterial,
 );
 companion.userData.roommateInteractive = true;
+companion.userData.roommateAction = () => {
+  if (!goal || sessionStarted) return;
+  sessionStarted = true;
+  wakeRing.visible = false;
+  companion.scale.setScalar(1.08);
+  for (const card of taskCards) {
+    card.visible = true;
+  }
+  console.log('Roommate: welcome. Your workspace is ready.');
+  updateTaskFocus();
+  updateCompanion();
+};
 companion.position.set(0, 1.55, -1.0);
 root.add(companion);
 
@@ -478,17 +495,7 @@ companion.addEventListener('pointerdown', () => {
     return;
   }
 
-  sessionStarted = true;
-  wakeRing.visible = false;
-  companion.scale.setScalar(1.08);
-
-  for (const card of taskCards) {
-    card.visible = true;
-  }
-
-  console.log('Roommate: welcome. Your workspace is ready.');
-  updateTaskFocus();
-  updateCompanion();
+  companion.userData.roommateAction?.();
 });
 
 console.log('Spatial Roommate companion reasoning ready', {
