@@ -379,7 +379,7 @@ function clearTaskCards(): void {
   taskCards.length = 0;
 }
 
-function showGoalPanel(): void {
+function showGoalPanel(): HTMLDivElement {
   if (!goalPanel) {
     goalPanel = document.createElement('div');
     goalPanel.className = 'goal-panel';
@@ -404,6 +404,8 @@ function showGoalPanel(): void {
       void startWorkspace(button.dataset.goal ?? '');
     });
   });
+
+  return goalPanel;
 }
 
 function completeTask(index: number): void {
@@ -533,15 +535,13 @@ hud.className = 'roommate-hud';
 document.body.appendChild(hud);
 
 if (!goal) {
-  showGoalPanel();
-  if (goalPanel) {
-    const title = goalPanel.querySelector('.goal-panel-title');
-    const subtitle = goalPanel.querySelector('.goal-panel-subtitle');
-    if (title) title.textContent = 'What are we working on?';
-    if (subtitle) {
-      subtitle.textContent =
-        'Choose a direction and Roommate will shape the spatial workspace around it.';
-    }
+  const panel = showGoalPanel();
+  const title = panel.querySelector('.goal-panel-title');
+  const subtitle = panel.querySelector('.goal-panel-subtitle');
+  if (title) title.textContent = 'What are we working on?';
+  if (subtitle) {
+    subtitle.textContent =
+      'Choose a direction and Roommate will shape the spatial workspace around it.';
   }
   console.log('Roommate: choose a goal from the browser goal panel.');
 } else {
