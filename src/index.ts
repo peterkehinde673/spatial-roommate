@@ -301,9 +301,19 @@ function updateTaskFocus(): void {
     const card = taskCards[index];
     if (!card) continue;
 
-    card.scale.setScalar(
-      task.status === 'complete' ? 1.08 : task.id === nextOpenId ? 1.16 : 0.92,
-    );
+    const material = card.material as MeshStandardMaterial;
+    const isNext = task.id === nextOpenId;
+    const isComplete = task.status === 'complete';
+
+    card.scale.setScalar(isComplete ? 1.08 : isNext ? 1.16 : 0.92);
+
+    if (isComplete) {
+      material.emissive.setHex(0x166534);
+    } else if (isNext) {
+      material.emissive.setHex(0x2563eb);
+    } else {
+      material.emissive.setHex(0x0f172a);
+    }
   }
 }
 
