@@ -114,6 +114,22 @@ if (isQuestBrowser) {
       }
     }
 
+    if (sessionStarted && plannedTasks.length > 0) {
+      for (let index = 0; index < taskCards.length; index += 1) {
+        const task = plannedTasks[index];
+        const card = taskCards[index];
+        if (!task || !card || !card.visible || task.status !== 'open') continue;
+
+        screenPoint.copy(card.position).project(browserCamera);
+        const taskX = rect.left + ((screenPoint.x + 1) / 2) * rect.width;
+        const taskY = rect.top + ((1 - screenPoint.y) / 2) * rect.height;
+        if (Math.hypot(event.clientX - taskX, event.clientY - taskY) < 95) {
+          completeTask(index);
+          return;
+        }
+      }
+    }
+
     raycaster.setFromCamera(pointer, browserCamera);
     const hits = raycaster.intersectObjects(browserScene.children, true);
     // Decorative rings can be closer to the camera than the interactive
@@ -348,6 +364,40 @@ function clearTaskCards(): void {
   taskCards.length = 0;
 }
 
+function completeTask(index: number): void {
+  const task = plannedTasks[index];
+  const card = taskCards[index];
+  if (!task || !card || task.status !== 'open') return;
+
+  task.status = 'complete';
+  card.scale.setScalar(1.08);
+  card.material = completeMaterial.clone();
+
+  saveSession(goal, plannedTasks);
+
+  completionPulse.visible = true;
+  completionPulse.scale.setScalar(0.7);
+  setTimeout(() => completionPulse.scale.setScalar(1.15), 120);
+  setTimeout(() => completionPulse.scale.setScalar(1), 280);
+
+  const summary = summarizeSession(plannedTasks);
+  if (summary.finished) {
+    sessionStarted = false;
+    wakeRing.visible = false;
+    returnBeacon.visible = true;
+    returnBeacon.scale.setScalar(1.35);
+    if (goalPanel) goalPanel.style.display = 'grid';
+    console.log('Roommate: you finished this goal. Choose another goal when you are ready to return.');
+  } else {
+    console.log(
+      `Roommate: ${summary.remaining} step${summary.remaining === 1 ? '' : 's'} left${summary.nextTask ? ` — next: ${summary.nextTask}` : ''}.`,
+    );
+  }
+
+  updateTaskFocus();
+  updateCompanion();
+}
+
 function createTaskCards(): void {
   clearTaskCards();
 
@@ -372,6 +422,7 @@ function createTaskCards(): void {
       activeTaskMaterial.clone(),
     );
     card.userData.roommateInteractive = true;
+    card.userData.roommateAction = () => completeTask(index);
     card.rotation.y = index * 0.12;
     card.position.set(-1.1 + index * 1.1, 1.18, -1.05);
     card.visible = memory.resumed;
@@ -402,40 +453,7 @@ function createTaskCards(): void {
     }
 
     card.addEventListener('pointerdown', () => {
-      if (task.status !== 'open') return;
-
-      task.status = 'complete';
-      card.scale.setScalar(1.08);
-      card.material = completeMaterial.clone();
-
-      saveSession(goal, plannedTasks);
-      {
-        const pulse = completionPulse;
-        pulse.visible = true;
-        pulse.scale.setScalar(0.7);
-        setTimeout(() => {
-          pulse.scale.setScalar(1.15);
-        }, 120);
-        setTimeout(() => {
-          pulse.scale.setScalar(1);
-        }, 280);
-      }
-      const summary = summarizeSession(plannedTasks);
-      if (summary.finished && goalPanel) {
-        goalPanel.style.display = 'grid';
-        sessionStarted = false;
-        wakeRing.visible = false;
-        returnBeacon.visible = true;
-        returnBeacon.scale.setScalar(1.35);
-        console.log('Roommate: you finished this goal. Choose another goal when you are ready to return.');
-      }
-      console.log(
-        summary.finished
-          ? 'Roommate: session complete. Come back when you are ready for the next goal.'
-          : `Roommate: ${summary.remaining} step${summary.remaining === 1 ? '' : 's'} left${summary.nextTask ? ` — next: ${summary.nextTask}` : ''}.`,
-      );
-      updateTaskFocus();
-      updateCompanion();
+      completeTask(index);
     });
   }
 }
@@ -446,7 +464,13 @@ async function startWorkspace(selectedGoal: string): Promise<void> {
 
   plannedTasks = planGoal(goal);
   memory = loadSession(plannedTasks, goal);
-  sessionStarted = memory.resumed;
+  const restoredSummary = summarizeSession(plannedTasks);
+  sessionStarted = memory.resumed && !restoredSummary.finished;
+  if (restoredSummary.finished) {
+    for (const task of plannedTasks) task.status = 'open';
+    localStorage.removeItem('spatial-roommate-session-v1');
+    memory = { goal: '', resumed: false };
+  }
   createTaskCards();
 
   wakeRing.visible = !sessionStarted;
