@@ -38,7 +38,45 @@
         color: #fecaca;
       }
 
-      .goal-panel {
+      .roommate-hud {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+}
+.roommate-hud-card {
+  max-width: 72%;
+  padding: 10px 14px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.78);
+  color: #f8fafc;
+  backdrop-filter: blur(12px);
+}
+.roommate-hud-goal {
+  font-size: 13px;
+  color: #cbd5e1;
+}
+.roommate-hud-progress {
+  margin-top: 2px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.roommate-hud-hint {
+  align-self: center;
+  padding: 9px 12px;
+  border-radius: 12px;
+  background: rgba(14, 116, 144, 0.82);
+  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 700;
+}
+.goal-panel {
         position: fixed;
         inset: 0;
         display: grid;
