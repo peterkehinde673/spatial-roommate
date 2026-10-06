@@ -382,6 +382,12 @@ function createTaskCards(): void {
 
     taskCards.push(card);
 
+    // The browser preview has no IWSDK world to register the entity with,
+    // so explicitly attach task meshes to the Three.js scene.
+    if (!world) {
+      root.add(card);
+    }
+
     if (world) {
       const entity = world.createTransformEntity(card);
       entity.addComponent(RayInteractable);
