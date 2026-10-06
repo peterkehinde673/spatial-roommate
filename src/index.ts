@@ -101,7 +101,12 @@ if (isQuestBrowser) {
     pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     raycaster.setFromCamera(pointer, browserCamera);
     const hits = raycaster.intersectObjects(browserScene.children, true);
-    const target = hits[0]?.object;
+    // Decorative rings can be closer to the camera than the interactive
+    // companion/task mesh. Select the nearest explicitly interactive object
+    // rather than letting the decoration swallow the tap.
+    const target = hits.find(
+      (hit) => hit.object.userData.roommateInteractive === true,
+    )?.object;
     if (target) {
       target.dispatchEvent({
         type: 'pointerdown',
@@ -133,6 +138,7 @@ const companion = new Mesh(
   new SphereGeometry(0.22, 24, 16),
   companionMaterial,
 );
+companion.userData.roommateInteractive = true;
 companion.position.set(0, 1.55, -1.0);
 root.add(companion);
 
@@ -333,6 +339,7 @@ function createTaskCards(): void {
       taskGeometry.clone(),
       activeTaskMaterial.clone(),
     );
+    card.userData.roommateInteractive = true;
     card.rotation.y = index * 0.18;
     card.position.set(...task.position);
     card.visible = memory.resumed;
