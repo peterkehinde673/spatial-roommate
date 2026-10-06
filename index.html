@@ -111,7 +111,49 @@
         margin-bottom: 20px;
       }
 
-      .goal-panel button {
+      .roommate-hud-hint {
+  min-width: 132px;
+  text-align: center;
+}
+.roommate-hud-hint.is-complete {
+  background: rgba(22, 101, 52, 0.9);
+}
+.roommate-hud-hint.is-active {
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.2);
+}
+@media (prefers-reduced-motion: reduce) {
+  .roommate-hud-card,
+  .roommate-hud-hint {
+    scroll-behavior: auto;
+  }
+}
+@media (max-width: 600px) {
+  .roommate-hud {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    gap: 8px;
+  }
+  .roommate-hud-card {
+    max-width: 62%;
+    padding: 9px 11px;
+  }
+  .roommate-hud-goal {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .roommate-hud-progress {
+    font-size: 14px;
+  }
+  .roommate-hud-hint {
+    min-width: 112px;
+    padding: 8px 9px;
+    font-size: 12px;
+  }
+}
+
+.goal-panel button {
         display: block;
         width: 100%;
         min-height: 58px;
