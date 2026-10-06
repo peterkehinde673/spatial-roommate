@@ -14,6 +14,7 @@ import {
   Raycaster,
   Scene,
   Vector2,
+  Vector3,
   WebGLRenderer,
 } from 'three';
 import { getCompanionState } from './domain/companion';
@@ -99,6 +100,20 @@ if (isQuestBrowser) {
     const rect = browserRenderer.domElement.getBoundingClientRect();
     pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    // On touch browsers, use screen-space hit testing for the main
+    // companion/task targets before relying on WebGL ray intersections.
+    const screenPoint = new Vector3();
+    if (!sessionStarted && goal) {
+      screenPoint.copy(companion.position).project(browserCamera);
+      const companionX = rect.left + ((screenPoint.x + 1) / 2) * rect.width;
+      const companionY = rect.top + ((1 - screenPoint.y) / 2) * rect.height;
+      if (Math.hypot(event.clientX - companionX, event.clientY - companionY) < 110) {
+        companion.userData.roommateAction?.();
+        return;
+      }
+    }
+
     raycaster.setFromCamera(pointer, browserCamera);
     const hits = raycaster.intersectObjects(browserScene.children, true);
     // Decorative rings can be closer to the camera than the interactive
