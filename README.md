@@ -102,6 +102,21 @@ The public GitHub Pages demo accepts a goal directly through the URL:
 
 This preserves the normal onboarding experience while giving judges and demo recordings a fast way to enter a specific goal-driven workspace.
 
+
+### Recommended judge walkthrough
+
+For the fastest evaluation of the core experience:
+
+1. Open the public demo and choose **Build something**.
+2. Tap the blue Roommate companion to enter the spatial workspace.
+3. Notice the three spatial task objects and the highlighted next step.
+4. Complete each task object and watch the object, progress markers, companion, desk, and HUD react.
+5. Finish all three steps to see the completion state and **What comes next?** return loop.
+6. Reload an unfinished goal to demonstrate persistent progress and the **Welcome back** state.
+7. For a direct demo, use a documented `?goal=` shortcut to start with a specific goal.
+
+The browser path is the public demonstration surface; the Quest/IWSDK path is the intended immersive interaction experience.
+
 ## Project status
 
 Core development is approaching feature freeze. The next stage is final QA, production/demo verification, visual capture, video preparation, and Devpost submission.
