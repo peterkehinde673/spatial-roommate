@@ -80,6 +80,23 @@ Commands verified by CI:
 
 The project also has a dedicated Phase 3 verification workflow and automatic GitHub Pages deployment.
 
+
+### Why ROOMMATE is spatial
+
+ROOMMATE is not a chatbot placed inside a 3D scene. The **workspace itself is the interface**:
+
+- The goal becomes a spatial arrangement of task objects.
+- The user physically/pointer-interacts with those objects instead of completing a conventional checklist.
+- The next task is represented by spatial emphasis and position.
+- Completion changes the companion, desk, progress markers, and surrounding visual state.
+- Returning to an unfinished goal restores the spatial workspace instead of simply reopening a text list.
+
+The result is a productivity loop designed around **presence, spatial action, and environmental feedback**.
+
+### One-line pitch
+
+**ROOMMATE turns “what do I need to get done?” into a living spatial workspace you can enter, act on, and return to.**
+
 ## Competition positioning
 
 **Primary division:** Productivity
