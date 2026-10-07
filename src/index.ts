@@ -284,12 +284,21 @@ let hud: HTMLDivElement | null = null;
 function updateHud(): void {
   if (!hud || !goal) return;
   const summary = summarizeSession(plannedTasks);
+  const nextTask = plannedTasks.find((task) => task.status === 'open');
+  const hint = summary.finished
+    ? 'Goal complete'
+    : sessionStarted
+      ? nextTask
+        ? `Next: ${nextTask.title}`
+        : 'Keep going'
+      : 'Tap Roommate to begin';
+
   hud.innerHTML = `
     <div class="roommate-hud-card">
       <div class="roommate-hud-goal">${goal}</div>
       <div class="roommate-hud-progress">Progress ${summary.completed}/${summary.total}</div>
     </div>
-    <div class="roommate-hud-hint">${summary.finished ? 'Goal complete' : sessionStarted ? 'Tap the next task' : 'Tap Roommate to begin'}</div>
+    <div class="roommate-hud-hint">${hint}</div>
   `;
 }
 
