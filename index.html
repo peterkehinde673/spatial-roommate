@@ -3,26 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#050a18" />
-  <meta
-    name="description"
-    content="ROOMMATE is a spatial AI productivity companion that turns goals into an interactive workspace."
-  />
-  <meta property="og:title" content="ROOMMATE — Spatial AI Companion" />
-  <meta
-    property="og:description"
-    content="Turn a goal into a spatial workspace, make progress with interactive task objects, and return to where you left off."
-  />
-  <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#0b1020" />
-    <title>Spatial Roommate</title>
+    <meta name="theme-color" content="#050a18" />
+    <meta
+      name="description"
+      content="ROOMMATE is a spatial AI productivity companion that turns goals into an interactive workspace."
+    />
+    <meta property="og:title" content="ROOMMATE — Spatial AI Companion" />
+    <meta
+      property="og:description"
+      content="Turn a goal into a spatial workspace, make progress with interactive task objects, and return to where you left off."
+    />
+    <meta property="og:type" content="website" />
+    <title>ROOMMATE — Spatial AI Companion</title>
     <style>
       html, body {
         margin: 0;
         width: 100%;
         height: 100%;
         overflow: hidden;
-        background: #0b1020;
+        background: #050a18;
         font-family: system-ui, sans-serif;
       }
 
@@ -41,7 +40,7 @@
         color: #e2e8f0;
         text-align: center;
         font-size: 18px;
-        background: #0b1020;
+        background: #050a18;
         z-index: 10;
       }
 
@@ -50,44 +49,59 @@
       }
 
       .roommate-hud {
-  position: fixed;
-  top: 16px;
-  left: 16px;
-  right: 16px;
-  z-index: 10;
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  pointer-events: none;
-}
-.roommate-hud-card {
-  max-width: 72%;
-  padding: 10px 14px;
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  border-radius: 14px;
-  background: rgba(15, 23, 42, 0.78);
-  color: #f8fafc;
-  backdrop-filter: blur(12px);
-}
-.roommate-hud-goal {
-  font-size: 13px;
-  color: #cbd5e1;
-}
-.roommate-hud-progress {
-  margin-top: 2px;
-  font-size: 15px;
-  font-weight: 700;
-}
-.roommate-hud-hint {
-  align-self: center;
-  padding: 9px 12px;
-  border-radius: 12px;
-  background: rgba(14, 116, 144, 0.82);
-  color: #f8fafc;
-  font-size: 13px;
-  font-weight: 700;
-}
-.goal-panel {
+        position: fixed;
+        top: 16px;
+        left: 16px;
+        right: 16px;
+        z-index: 10;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        pointer-events: none;
+      }
+
+      .roommate-hud-card {
+        max-width: 72%;
+        padding: 10px 14px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 14px;
+        background: rgba(15, 23, 42, 0.78);
+        color: #f8fafc;
+        backdrop-filter: blur(12px);
+      }
+
+      .roommate-hud-goal {
+        font-size: 13px;
+        color: #cbd5e1;
+      }
+
+      .roommate-hud-progress {
+        margin-top: 2px;
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      .roommate-hud-hint {
+        min-width: 132px;
+        align-self: center;
+        padding: 9px 12px;
+        border-radius: 12px;
+        background: rgba(14, 116, 144, 0.82);
+        color: #f8fafc;
+        font-size: 13px;
+        font-weight: 700;
+        text-align: center;
+      }
+
+      .roommate-hud-hint.is-complete {
+        background: rgba(22, 101, 52, 0.9);
+      }
+
+      .roommate-hud-hint.is-active {
+        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.2);
+      }
+
+      .goal-panel {
         position: fixed;
         inset: 0;
         display: grid;
@@ -122,49 +136,7 @@
         margin-bottom: 20px;
       }
 
-      .roommate-hud-hint {
-  min-width: 132px;
-  text-align: center;
-}
-.roommate-hud-hint.is-complete {
-  background: rgba(22, 101, 52, 0.9);
-}
-.roommate-hud-hint.is-active {
-  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.2);
-}
-@media (prefers-reduced-motion: reduce) {
-  .roommate-hud-card,
-  .roommate-hud-hint {
-    scroll-behavior: auto;
-  }
-}
-@media (max-width: 600px) {
-  .roommate-hud {
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    gap: 8px;
-  }
-  .roommate-hud-card {
-    max-width: 62%;
-    padding: 9px 11px;
-  }
-  .roommate-hud-goal {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .roommate-hud-progress {
-    font-size: 14px;
-  }
-  .roommate-hud-hint {
-    min-width: 112px;
-    padding: 8px 9px;
-    font-size: 12px;
-  }
-}
-
-.goal-panel button {
+      .goal-panel button {
         display: block;
         width: 100%;
         min-height: 58px;
@@ -186,11 +158,48 @@
         outline: 2px solid #38bdf8;
         outline-offset: 2px;
       }
+
+      @media (prefers-reduced-motion: reduce) {
+        .roommate-hud-card,
+        .roommate-hud-hint {
+          scroll-behavior: auto;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .roommate-hud {
+          top: 10px;
+          left: 10px;
+          right: 10px;
+          gap: 8px;
+        }
+
+        .roommate-hud-card {
+          max-width: 62%;
+          padding: 9px 11px;
+        }
+
+        .roommate-hud-goal {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .roommate-hud-progress {
+          font-size: 14px;
+        }
+
+        .roommate-hud-hint {
+          min-width: 112px;
+          padding: 8px 9px;
+          font-size: 12px;
+        }
+      }
     </style>
   </head>
   <body>
     <div id="scene-container"></div>
-    <div id="runtime-status">Starting Spatial Roommate…</div>
+    <div id="runtime-status">Starting ROOMMATE…</div>
     <script type="module" src="/src/index.ts"></script>
   </body>
 </html>
