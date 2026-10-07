@@ -82,6 +82,7 @@ if (isQuestBrowser) {
   browserCamera.lookAt(0, 1.3, -1);
 
   browserRenderer = new WebGLRenderer({ antialias: true, alpha: false });
+  browserRenderer.setClearColor(0x050a18, 1);
   browserRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   browserRenderer.setSize(window.innerWidth, window.innerHeight);
   container.appendChild(browserRenderer.domElement);
@@ -160,6 +161,14 @@ if (isQuestBrowser) {
 }
 
 const root = world ? world.getPersistentRoot() : browserScene!;
+
+const floorMaterial = new MeshStandardMaterial({
+  color: 0x0f172a,
+  roughness: 0.92,
+});
+const floor = new Mesh(new BoxGeometry(8, 0.05, 8), floorMaterial);
+floor.position.set(0, 0.88, -1.0);
+root.add(floor);
 
 const deskMaterial = new MeshStandardMaterial({ color: 0x243047 });
 const desk = new Mesh(new BoxGeometry(3.2, 0.12, 2.0), deskMaterial);
