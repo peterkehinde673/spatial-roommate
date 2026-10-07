@@ -42,7 +42,9 @@ Examples:
 
 ### Hands-first interaction
 
-Task objects support direct hand/poke interaction, ray interaction, and one-hand grabbing and translation.
+In the Quest/IWSDK runtime, task objects support hand/poke interaction, ray interaction, and one-hand grabbing and translation.
+
+The public GitHub Pages demo provides a browser-compatible interaction path with large direct touch/click targets, so the same spatial task loop can be demonstrated on phones and desktops without a headset.
 
 ### Reactive environment
 
