@@ -288,9 +288,13 @@ function updateHud(): void {
   const hint = summary.finished
     ? 'Goal complete'
     : sessionStarted
-      ? nextTask
-        ? `Next: ${nextTask.title}`
-        : 'Keep going'
+      ? memory.resumed && summary.completed > 0
+        ? nextTask
+          ? `Welcome back · Next: ${nextTask.title}`
+          : 'Welcome back · Keep going'
+        : nextTask
+          ? `Next: ${nextTask.title}`
+          : 'Keep going'
       : 'Tap Roommate to begin';
 
   hud.innerHTML = `
