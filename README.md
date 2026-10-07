@@ -89,6 +89,17 @@ Strong potential alignment:
 - **Best First Five Minutes** — spatial onboarding quickly gets the user into the core interaction.
 - **Boldest Original Concept** — productivity work becomes part of the physical/spatial environment.
 
+
+### Judge/demo shortcuts
+
+The public GitHub Pages demo accepts a goal directly through the URL:
+
+- Build: `?goal=Build%20a%20portfolio%20project`
+- Learn: `?goal=Learn%20a%20new%20skill`
+- Plan: `?goal=Plan%20a%20productive%20week`
+
+This preserves the normal onboarding experience while giving judges and demo recordings a fast way to enter a specific goal-driven workspace.
+
 ## Project status
 
 Core development is approaching feature freeze. The next stage is final QA, production/demo verification, visual capture, video preparation, and Devpost submission.
