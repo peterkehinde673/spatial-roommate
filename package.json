@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "check:production": "npm run typecheck && npm run build"
+    "check:production": "npm run typecheck && npm test && npm run build",
+    "test": "vitest run"
   },
   "dependencies": {
     "@iwsdk/core": "^1.0.0",
@@ -17,7 +18,8 @@
   "devDependencies": {
     "@iwsdk/vite-plugin-dev": "^1.0.0",
     "typescript": "^5.9.0",
-    "vite": "^7.1.0"
+    "vite": "^7.1.0",
+    "vitest": "^3.2.4"
   },
   "overrides": {
     "three": "npm:super-three@0.181.0"
