@@ -5,6 +5,14 @@ import { summarizeSession } from '../src/domain/session';
 import type { SpatialTask } from '../src/domain/tasks';
 import { getStoredGoal, loadSession, saveSession } from '../src/domain/memory';
 
+const memoryStore = new Map<string, string>();
+const fakeStorage = {
+  getItem: (key: string) => memoryStore.get(key) ?? null,
+  setItem: (key: string, value: string) => { memoryStore.set(key, value); },
+  removeItem: (key: string) => { memoryStore.delete(key); },
+  clear: () => memoryStore.clear(),
+};
+
 function tasks(): SpatialTask[] {
   return planGoal('Build a portfolio project');
 }
@@ -49,8 +57,9 @@ describe('session summaries', () => {
 
 describe('session persistence', () => {
   beforeEach(() => {
-    localStorage.clear();
+    memoryStore.clear();
     vi.restoreAllMocks();
+    vi.stubGlobal('localStorage', fakeStorage);
   });
 
   it('saves and restores valid progress for the same goal', () => {
@@ -72,14 +81,15 @@ describe('session persistence', () => {
   });
 
   it('recovers from malformed stored JSON', () => {
-    localStorage.setItem('spatial-roommate-session-v1', '{broken');
+    fakeStorage.setItem('spatial-roommate-session-v1', '{broken');
     expect(getStoredGoal()).toBe('');
-    expect(localStorage.getItem('spatial-roommate-session-v1')).toBeNull();
+    expect(fakeStorage.getItem('spatial-roommate-session-v1')).toBeNull();
   });
 
   it('does not throw when storage writes are blocked', () => {
-    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
-      throw new DOMException('blocked', 'SecurityError');
+    vi.stubGlobal('localStorage', {
+      ...fakeStorage,
+      setItem: () => { throw new Error('blocked'); },
     });
     expect(() => saveSession('Build a portfolio project', tasks())).not.toThrow();
   });
