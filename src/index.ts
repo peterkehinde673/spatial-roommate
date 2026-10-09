@@ -324,7 +324,7 @@ function updateHud(): void {
       <div class="roommate-hud-goal">${escapeHtml(goal)}</div>
       <div class="roommate-hud-progress">Progress ${summary.completed}/${summary.total}</div>
     </div>
-    <div class="roommate-hud-hint">${hint}</div>
+    <div class="roommate-hud-hint">${escapeHtml(hint)}</div>
   `;
 }
 
