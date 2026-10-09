@@ -1,28 +1,53 @@
-import type { SpatialTask } from './tasks';
+import type { SpatialTask, TaskStatus } from './tasks';
 
 const STORAGE_KEY = 'spatial-roommate-session-v1';
 
 interface StoredSession {
   goal: string;
-  tasks: Array<{ id: string; status: SpatialTask['status'] }>;
+  tasks: Array<{ id: string; status: TaskStatus }>;
+}
+
+function isTaskStatus(value: unknown): value is TaskStatus {
+  return value === 'open' || value === 'complete';
 }
 
 function readStoredSession(): StoredSession | null {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) {
-    return null;
-  }
-
   try {
-    return JSON.parse(raw) as StoredSession;
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+
+    const parsed: unknown = JSON.parse(raw);
+    if (
+      typeof parsed !== 'object' ||
+      parsed === null ||
+      !('goal' in parsed) ||
+      typeof parsed.goal !== 'string' ||
+      !('tasks' in parsed) ||
+      !Array.isArray(parsed.tasks)
+    ) {
+      localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+
+    const tasks = parsed.tasks.filter(
+      (item): item is { id: string; status: TaskStatus } =>
+        typeof item === 'object' &&
+        item !== null &&
+        'id' in item &&
+        typeof item.id === 'string' &&
+        'status' in item &&
+        isTaskStatus(item.status),
+    );
+
+    return { goal: parsed.goal, tasks };
   } catch {
-    localStorage.removeItem(STORAGE_KEY);
+    // Storage can be unavailable in private/restricted browser contexts.
     return null;
   }
 }
 
 export function getStoredGoal(): string {
-  return readStoredSession()?.goal?.trim() ?? '';
+  return readStoredSession()?.goal.trim() ?? '';
 }
 
 export function saveSession(goal: string, tasks: SpatialTask[]): void {
@@ -31,7 +56,11 @@ export function saveSession(goal: string, tasks: SpatialTask[]): void {
     tasks: tasks.map((task) => ({ id: task.id, status: task.status })),
   };
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+  } catch {
+    // The app remains usable when browser storage is blocked or full.
+  }
 }
 
 export function loadSession(
