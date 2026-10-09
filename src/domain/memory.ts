@@ -41,7 +41,12 @@ function readStoredSession(): StoredSession | null {
 
     return { goal: parsed.goal, tasks };
   } catch {
-    // Storage can be unavailable in private/restricted browser contexts.
+    // Clear corrupt JSON when possible; tolerate blocked storage APIs.
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // Ignore storage access failures and keep the app usable.
+    }
     return null;
   }
 }
