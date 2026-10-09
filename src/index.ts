@@ -290,6 +290,19 @@ const taskCards: Mesh[] = [];
 let goalPanel: HTMLDivElement | null = null;
 let hud: HTMLDivElement | null = null;
 
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (character) => {
+    const entities: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    };
+    return entities[character] ?? character;
+  });
+}
+
 function updateHud(): void {
   if (!hud || !goal) return;
   const summary = summarizeSession(plannedTasks);
@@ -308,7 +321,7 @@ function updateHud(): void {
 
   hud.innerHTML = `
     <div class="roommate-hud-card">
-      <div class="roommate-hud-goal">${goal}</div>
+      <div class="roommate-hud-goal">${escapeHtml(goal)}</div>
       <div class="roommate-hud-progress">Progress ${summary.completed}/${summary.total}</div>
     </div>
     <div class="roommate-hud-hint">${hint}</div>
