@@ -1,141 +1,93 @@
-# Spatial Roommate
+# ROOMMATE — Spatial AI Companion
 
-A spatial AI productivity companion built for the **Meta VR Start Developer Competition 2026**.
+**A goal-driven spatial productivity workspace built for the Meta VR Start Developer Competition 2026.**
 
-## The idea
+ROOMMATE explores a simple idea: what if getting things done felt less like managing a flat checklist and more like entering a workspace that responds to you?
 
-ROOMMATE turns the user's physical environment into a living task workspace.
+**[Open the live demo](https://peterkehinde673.github.io/spatial-roommate/) · [Watch the demo](https://youtube.com/shorts/9YBgDu8ZCFU) · [Source code](https://github.com/peterkehinde673/spatial-roommate)**
 
-Instead of opening a conventional productivity app, the user:
+## The experience
 
-1. Chooses what they want to accomplish.
-2. Meets the Roommate companion.
-3. Gets a goal-shaped spatial plan.
-4. Manipulates physical task objects with hands or ray interaction.
-5. Sees the room react as progress is made.
-6. Returns later and continues where they left off.
-7. Starts a new goal after completing a session.
+ROOMMATE turns a chosen goal into a small sequence of spatial task objects. The companion directs attention to the next step, objects change as tasks are completed, and the workspace responds to progress. Saved session state lets users return to an unfinished goal.
 
-The core loop is:
+```text
+Choose a goal → Enter the workspace → Act on spatial tasks
+     ↑                                            ↓
+Return to continue ← Remember progress ← See the room respond
+```
 
-**Goal → Understand → Plan → Spatial action → Progress → Remember → Return**
+## What the prototype includes
 
-## What is implemented
+- **Goal-led onboarding:** choose a build, learn, or plan direction.
+- **Goal-aware task planning:** maps the goal to a three-step sequence.
+- **Spatial interaction:** task objects are placed in the scene and have distinct active and completed states.
+- **Progress feedback:** task materials, emphasis, progress markers, companion mood, and workspace color respond to progress.
+- **Session continuity:** unfinished progress is stored locally in the browser.
+- **Return loop:** completing a goal offers a new direction rather than ending the experience.
+- **Browser demo path:** touch/click interaction makes the core loop easy to inspect on a phone or desktop.
 
-### Spatial onboarding
+## Try the demo
 
-The first experience presents three goal directions:
+Open the [live ROOMMATE demo](https://peterkehinde673.github.io/spatial-roommate/).
 
-- **Build** — make something concrete.
-- **Learn** — practice a skill.
-- **Plan** — organize what comes next.
+You can open a goal directly with one of these URLs:
 
-### Goal-aware planning
+- [Build a portfolio project](https://peterkehinde673.github.io/spatial-roommate/?goal=Build%20a%20portfolio%20project)
+- [Learn a new skill](https://peterkehinde673.github.io/spatial-roommate/?goal=Learn%20a%20new%20skill)
+- [Plan a productive week](https://peterkehinde673.github.io/spatial-roommate/?goal=Plan%20a%20productive%20week)
 
-Roommate classifies natural goal language into Build, Learn, Plan, or General intent and generates a three-step spatial sequence.
+### Suggested judge walkthrough
 
-Examples:
+1. Open the live demo and select **Build something**.
+2. Tap the blue Roommate companion to begin.
+3. Notice the task objects and the highlighted next step.
+4. Complete the tasks one by one and observe the changing object states and progress feedback.
+5. Finish the goal and inspect the **What comes next?** return loop.
+6. For a persistence check, start a goal, complete one or two tasks, then reload the same goal URL in the same browser.
 
-- Build → Focus → Build → Ship
-- Learn → Question → Practice → Recall
-- Plan → Define → Organize → Next step
+## Why this is spatial
 
-### Hands-first interaction
+ROOMMATE is an exploration of productivity where the workspace is part of the interface—not just a conventional task list rendered over a 3D background.
 
-In the Quest/IWSDK runtime, task objects support hand/poke interaction, ray interaction, and one-hand grabbing and translation.
+- Tasks are represented as objects in a shared spatial scene.
+- Spatial emphasis signals what to focus on next.
+- Direct object interaction is the main task-completion metaphor.
+- Completion changes the companion and surrounding workspace.
+- Returning to an unfinished goal restores task state instead of starting from zero.
 
-The public GitHub Pages demo provides a browser-compatible interaction path with large direct touch/click targets, so the same spatial task loop can be demonstrated on phones and desktops without a headset.
-
-### Reactive environment
-
-Progress changes the spatial environment: task objects change state, the next task is emphasized, progress markers respond, the companion changes mood, the desk changes appearance, completion produces a spatial pulse, and a return beacon appears after finishing.
-
-### Persistent memory
-
-The current goal and task completion state are stored locally so the experience can resume a previous workspace when the same goal returns.
-
-### Return loop
-
-Completing a workspace does not end the experience. Roommate presents the goal selector again, creating a repeatable **complete → choose again → return** loop.
-
-## Technology
+## Built with
 
 - Meta Immersive Web SDK (IWSDK)
-- WebXR
-- Three.js
+- WebXR configuration and Three.js scene objects
 - TypeScript
 - Vite
 - GitHub Actions
 - GitHub Pages
 
+## Runtime notes
+
+The public GitHub Pages URL provides a Three.js browser preview with touch/click interaction for easy access and judging. The repository also contains IWSDK/WebXR configuration for the intended immersive path. The public browser demo should not be interpreted as proof of a tested physical-headset hand-tracking session; immersive behavior must be verified on a compatible Meta Quest browser/headset.
+
+Session progress is stored locally in the current browser and is not synced across devices.
+
 ## Development and verification
 
-The repository is intentionally GitHub-first. CI handles dependency installation, typechecking, and production builds.
+Requirements: Node.js and npm.
 
-Commands verified by CI:
+```bash
+npm install
+npm run typecheck
+npm run build
+```
 
-- `npm install`
-- `npm run typecheck`
-- `npm run build`
-
-The project also has a dedicated Phase 3 verification workflow and automatic GitHub Pages deployment.
-
-
-### Why ROOMMATE is spatial
-
-ROOMMATE is not a chatbot placed inside a 3D scene. The **workspace itself is the interface**:
-
-- The goal becomes a spatial arrangement of task objects.
-- The user physically/pointer-interacts with those objects instead of completing a conventional checklist.
-- The next task is represented by spatial emphasis and position.
-- Completion changes the companion, desk, progress markers, and surrounding visual state.
-- Returning to an unfinished goal restores the spatial workspace instead of simply reopening a text list.
-
-The result is a productivity loop designed around **presence, spatial action, and environmental feedback**.
-
-### One-line pitch
-
-**ROOMMATE turns “what do I need to get done?” into a living spatial workspace you can enter, act on, and return to.**
+GitHub Actions runs typechecking and a production build on pushes and pull requests. The Pages workflow builds and deploys the public demo.
 
 ## Competition positioning
 
-**Primary division:** Productivity
+**Primary track:** Productivity
 
-Strong potential alignment:
-
-- **Best Agentic Interaction** — goal interpretation drives planning and spatial behavior.
-- **Best Reason to Come Back** — persistent progress and a new-goal return loop.
-- **Best First Five Minutes** — spatial onboarding quickly gets the user into the core interaction.
-- **Boldest Original Concept** — productivity work becomes part of the physical/spatial environment.
-
-
-### Judge/demo shortcuts
-
-The public GitHub Pages demo accepts a goal directly through the URL:
-
-- Build: `?goal=Build%20a%20portfolio%20project`
-- Learn: `?goal=Learn%20a%20new%20skill`
-- Plan: `?goal=Plan%20a%20productive%20week`
-
-This preserves the normal onboarding experience while giving judges and demo recordings a fast way to enter a specific goal-driven workspace.
-
-
-### Recommended judge walkthrough
-
-For the fastest evaluation of the core experience:
-
-1. Open the public demo and choose **Build something**.
-2. Tap the blue Roommate companion to enter the spatial workspace.
-3. Notice the three spatial task objects and the highlighted next step.
-4. Complete each task object and watch the object, progress markers, companion, desk, and HUD react.
-5. Finish all three steps to see the completion state and **What comes next?** return loop.
-6. Reload an unfinished goal to demonstrate persistent progress and the **Welcome back** state.
-7. For a direct demo, use a documented `?goal=` shortcut to start with a specific goal.
-
-The browser path is the public demonstration surface; the Quest/IWSDK path is the intended immersive interaction experience.
+ROOMMATE explores how spatial computing can make goal setting, task focus, environmental feedback, and returning to unfinished work feel more embodied and continuous.
 
 ## Project status
 
-Core development is approaching feature freeze. The next stage is final QA, production/demo verification, visual capture, video preparation, and Devpost submission.
-
-This repository is an original project for the competition.
+This is a competition prototype focused on demonstrating the core interaction loop. The next development priorities are validating the immersive Quest path end-to-end, improving goal-specific task semantics, expanding automated tests, and continuing accessibility and performance checks.
